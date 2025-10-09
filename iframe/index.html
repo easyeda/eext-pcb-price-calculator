@@ -1,11 +1,430 @@
 <!doctype html>
-<html lang="zh-Hans">
+<html lang="zh-CN">
 	<head>
-		<title>Inner Frame</title>
-		<meta charset="utf-8" />
+		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>PCB 动态计价工具</title>
+		<style>
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+				background-color: #f4f7f6;
+				color: #333;
+				margin: 0;
+				padding: 20px;
+			}
+			#app {
+				max-width: 800px;
+				margin: 0 auto;
+				background-color: #fff;
+				padding: 25px;
+				border-radius: 8px;
+				box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+			}
+			h1,
+			h2 {
+				color: #0056b3;
+				border-bottom: 2px solid #eef;
+				padding-bottom: 10px;
+			}
+			.section {
+				margin-bottom: 30px;
+				padding: 20px;
+				border: 1px solid #ddd;
+				border-radius: 5px;
+				background-color: #fafafa;
+			}
+			.form-group {
+				display: flex;
+				align-items: center;
+				margin-bottom: 15px;
+			}
+			label {
+				flex: 0 0 150px;
+				font-weight: bold;
+			}
+			input[type='number'],
+			input[type='text'],
+			select {
+				flex: 1;
+				padding: 8px;
+				border: 1px solid #ccc;
+				border-radius: 4px;
+			}
+			button {
+				padding: 10px 20px;
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+				font-size: 14px;
+				font-weight: bold;
+				transition: background-color 0.3s;
+			}
+			.btn-primary {
+				background-color: #007bff;
+				color: white;
+			}
+			.btn-primary:hover {
+				background-color: #0056b3;
+			}
+			.btn-success {
+				background-color: #28a745;
+				color: white;
+			}
+			.btn-success:hover {
+				background-color: #218838;
+			}
+			.btn-danger {
+				background-color: #dc3545;
+				color: white;
+				padding: 5px 10px;
+				font-size: 12px;
+			}
+			.btn-danger:hover {
+				background-color: #c82333;
+			}
+			.btn-secondary {
+				background-color: #6c757d;
+				color: white;
+			}
+			.btn-secondary:hover {
+				background-color: #5a6268;
+			}
+			#conditionsList {
+				margin-top: 20px;
+			}
+			.condition-item {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 10px;
+				border: 1px solid #eee;
+				margin-bottom: 10px;
+				border-radius: 4px;
+				background-color: #fff;
+			}
+			.condition-info {
+				flex-grow: 1;
+			}
+			#finalPrice {
+				font-size: 24px;
+				font-weight: bold;
+				color: #28a745;
+				text-align: center;
+				margin-top: 20px;
+			}
+			#statusMessage {
+				text-align: center;
+				margin-top: 10px;
+				font-style: italic;
+				color: #6c757d;
+			}
+			.rule-management {
+				border-top: 1px solid #ddd;
+				padding-top: 20px;
+				margin-top: 20px;
+			}
+			.rule-management .form-group {
+				margin-bottom: 10px;
+			}
+			.rule-management button {
+				margin-right: 10px;
+			}
+		</style>
 	</head>
 	<body>
-		<p>这是一个示例 IFrame 页面</p>
+		<div id="app">
+			<!-- 第一部分：从EDA获取尺寸 -->
+			<div class="section">
+				<h2>1. 获取PCB尺寸</h2>
+				<p>请在您的EDA软件中选中PCB板框，然后点击下方按钮自动获取宽度和高度。</p>
+				<button id="getDimensionsBtn" class="btn-primary">从EDA获取选中图元尺寸</button>
+				<div id="statusMessage"></div>
+			</div>
+
+			<!-- 第二部分：基础信息和动态计价 -->
+			<div class="section">
+				<h2>2. 配置计价参数</h2>
+
+				<div class="form-group">
+					<label for="width">宽度:</label>
+					<input type="number" id="width" step="0.01" placeholder="单位: mm" />
+				</div>
+				<div class="form-group">
+					<label for="height">高度:</label>
+					<input type="number" id="height" step="0.01" placeholder="单位: mm" />
+				</div>
+				<div class="form-group">
+					<label for="basePrice">基础单价:</label>
+					<input type="number" id="basePrice" value="0.01" step="0.001" placeholder="单位: 元/mm²" />
+				</div>
+
+				<h3>动态计价条件</h3>
+				<div class="form-group">
+					<label for="conditionName">条件名称:</label>
+					<input type="text" id="conditionName" placeholder="例如: FR-4板材" />
+				</div>
+				<div class="form-group">
+					<label for="conditionType">计价方式:</label>
+					<select id="conditionType">
+						<option value="area">面积类型 (增加单价)</option>
+						<option value="fixed">一次性类型 (固定费用)</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="conditionAmount">金额:</label>
+					<input type="number" id="conditionAmount" step="0.01" placeholder="单价(元/mm²) 或 固定费用(元)" />
+				</div>
+				<button id="addConditionBtn" class="btn-success">添加计价条件</button>
+
+				<div id="conditionsList"></div>
+
+				<button id="calculateBtn" class="btn-primary" style="margin-top: 20px; width: 100%">计算最终价格</button>
+				<div id="finalPrice"></div>
+
+				<!-- 新增部分：规则管理 -->
+				<div class="rule-management">
+					<h3>计价规则管理</h3>
+					<div class="form-group">
+						<label for="ruleName">规则名称:</label>
+						<input type="text" id="ruleName" placeholder="例如: 标准双面板打样" />
+					</div>
+					<div class="form-group">
+						<label></label>
+						<button id="exportRuleBtn" class="btn-secondary">导出当前规则</button>
+						<button id="importRuleBtn" class="btn-secondary">导入规则文件</button>
+						<input type="file" id="importRuleFile" accept=".json" style="display: none" />
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				// --- DOM 元素引用 ---
+				const getDimensionsBtn = document.getElementById('getDimensionsBtn');
+				const widthInput = document.getElementById('width');
+				const heightInput = document.getElementById('height');
+				const basePriceInput = document.getElementById('basePrice');
+				const addConditionBtn = document.getElementById('addConditionBtn');
+				const calculateBtn = document.getElementById('calculateBtn');
+				const conditionsListDiv = document.getElementById('conditionsList');
+				const finalPriceDiv = document.getElementById('finalPrice');
+				const statusMessage = document.getElementById('statusMessage');
+
+				// 规则管理相关
+				const ruleNameInput = document.getElementById('ruleName');
+				const exportRuleBtn = document.getElementById('exportRuleBtn');
+				const importRuleBtn = document.getElementById('importRuleBtn');
+				const importRuleFileInput = document.getElementById('importRuleFile');
+
+				// --- 数据存储 ---
+				let priceConditions = []; // 存储动态计价条件的数组
+
+				// --- 事件监听器 ---
+
+				// 1. 获取尺寸按钮的点击事件
+				getDimensionsBtn.addEventListener('click', function () {
+					statusMessage.textContent = '正在尝试从EDA获取尺寸...';
+					statusMessage.style.color = '#007bff';
+
+					// 模拟API调用，实际使用时请替换为真实API
+					const primitivesPromise = eda.pcb_SelectControl.getSelectedPrimitives();
+
+					primitivesPromise
+						.then((selectedArray) => {
+							if (selectedArray && selectedArray.length > 0) {
+								const firstPrimitive = selectedArray[0];
+								const width = firstPrimitive.width * 0.254;
+								const height = firstPrimitive.height * 0.254;
+
+								widthInput.value = width.toFixed(2);
+								heightInput.value = height.toFixed(2);
+
+								statusMessage.textContent = `成功获取尺寸: ${width.toFixed(2)} mm x ${height.toFixed(2)} mm`;
+								statusMessage.style.color = 'green';
+							} else {
+								statusMessage.textContent = '没有选中的图元。请在EDA中选中PCB板框后重试。';
+								statusMessage.style.color = 'orange';
+							}
+						})
+						.catch((error) => {
+							statusMessage.textContent = '获取图元时发生错误，请查看控制台。';
+							statusMessage.style.color = 'red';
+							console.error('获取图元时发生错误:', error);
+						});
+				});
+
+				// 2. 添加计价条件按钮的点击事件
+				addConditionBtn.addEventListener('click', function () {
+					const name = document.getElementById('conditionName').value;
+					const type = document.getElementById('conditionType').value;
+					const amount = parseFloat(document.getElementById('conditionAmount').value);
+
+					if (!name || isNaN(amount)) {
+						alert('请填写完整的条件名称和金额！');
+						return;
+					}
+
+					const newCondition = { name, type, amount };
+					priceConditions.push(newCondition);
+
+					document.getElementById('conditionName').value = '';
+					document.getElementById('conditionAmount').value = '';
+
+					renderConditions();
+				});
+
+				// 3. 计算最终价格按钮的点击事件
+				calculateBtn.addEventListener('click', function () {
+					const width = parseFloat(widthInput.value);
+					const height = parseFloat(heightInput.value);
+					const basePrice = parseFloat(basePriceInput.value);
+
+					if (isNaN(width) || isNaN(height) || isNaN(basePrice)) {
+						finalPriceDiv.textContent = '请填写有效的宽度、高度和基础单价！';
+						finalPriceDiv.style.color = 'red';
+						return;
+					}
+
+					const area = width * height;
+					let currentUnitPrice = basePrice;
+					let fixedCosts = 0;
+
+					priceConditions.forEach((condition) => {
+						if (condition.type === 'area') {
+							currentUnitPrice += condition.amount;
+						} else if (condition.type === 'fixed') {
+							fixedCosts += condition.amount;
+						}
+					});
+
+					const areaCost = area * currentUnitPrice;
+					const totalCost = areaCost + fixedCosts;
+
+					finalPriceDiv.innerHTML = `
+            <div>PCB 面积: ${area.toFixed(2)} mm²</div>
+            <div>最终单价: ${currentUnitPrice.toFixed(3)} 元/mm²</div>
+            <div>面积费用: ${areaCost.toFixed(2)} 元</div>
+            <div>固定费用: ${fixedCosts.toFixed(2)} 元</div>
+            <hr style="margin: 10px 0;">
+            <div>最终总价: <span style="color: #dc3545;">${totalCost.toFixed(2)} 元</span></div>
+        `;
+					finalPriceDiv.style.color = '#333';
+				});
+
+				// 4. 导出规则按钮的点击事件
+				exportRuleBtn.addEventListener('click', function () {
+					const ruleName = ruleNameInput.value.trim() || '未命名计价规则';
+					const basePrice = parseFloat(basePriceInput.value);
+
+					if (isNaN(basePrice)) {
+						statusMessage.textContent = '导出失败：请先设置有效的基础单价。';
+						statusMessage.style.color = 'red';
+						return;
+					}
+
+					const ruleData = {
+						ruleName: ruleName,
+						basePrice: basePrice,
+						conditions: priceConditions,
+						exportDate: new Date().toLocaleString('zh-CN'),
+					};
+
+					const dataStr = JSON.stringify(ruleData, null, 2); // 格式化JSON
+					const dataBlob = new Blob([dataStr], { type: 'application/json' });
+					const url = URL.createObjectURL(dataBlob);
+
+					const link = document.createElement('a');
+					link.href = url;
+					link.download = `${ruleName}.json`;
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+
+					URL.revokeObjectURL(url); // 释放内存
+
+					statusMessage.textContent = `规则 "${ruleName}" 已成功导出！`;
+					statusMessage.style.color = 'green';
+				});
+
+				// 5. 导入规则按钮的点击事件
+				importRuleBtn.addEventListener('click', function () {
+					importRuleFileInput.click(); // 触发文件选择
+				});
+
+				// 6. 文件选择后的处理事件
+				importRuleFileInput.addEventListener('change', function (event) {
+					const file = event.target.files[0];
+					if (!file) return;
+
+					const reader = new FileReader();
+					reader.onload = function (e) {
+						try {
+							const ruleData = JSON.parse(e.target.result);
+
+							// 校验数据结构
+							if (!ruleData.hasOwnProperty('basePrice') || !ruleData.hasOwnProperty('conditions')) {
+								throw new Error('文件格式不正确，缺少必要字段。');
+							}
+
+							// 填充数据到表单
+							ruleNameInput.value = ruleData.ruleName || '';
+							basePriceInput.value = ruleData.basePrice;
+							priceConditions = ruleData.conditions;
+
+							// 更新UI
+							renderConditions();
+
+							statusMessage.textContent = `成功导入规则 "${ruleData.ruleName || '未命名'}"！`;
+							statusMessage.style.color = 'green';
+						} catch (error) {
+							statusMessage.textContent = `导入失败：${error.message}`;
+							statusMessage.style.color = 'red';
+							console.error('导入规则失败:', error);
+						}
+					};
+					reader.readAsText(file);
+
+					// 清空文件输入，允许重复选择同一文件
+					event.target.value = '';
+				});
+
+				// --- 辅助函数 ---
+
+				// 渲染计价条件列表
+				function renderConditions() {
+					conditionsListDiv.innerHTML = '';
+					if (priceConditions.length === 0) {
+						conditionsListDiv.innerHTML = '<p>暂无计价条件。</p>';
+						return;
+					}
+
+					priceConditions.forEach((condition, index) => {
+						const conditionItem = document.createElement('div');
+						conditionItem.className = 'condition-item';
+
+						const info = document.createElement('div');
+						info.className = 'condition-info';
+						const typeText = condition.type === 'area' ? ' (面积类型)' : ' (一次性类型)';
+						info.innerHTML = `<strong>${condition.name}</strong>: ${condition.amount} 元${condition.type === 'area' ? '/mm²' : ''}${typeText}`;
+
+						const deleteButton = document.createElement('button');
+						deleteButton.className = 'btn-danger';
+						deleteButton.textContent = '删除';
+						deleteButton.addEventListener('click', function () {
+							priceConditions.splice(index, 1);
+							renderConditions();
+						});
+
+						conditionItem.appendChild(info);
+						conditionItem.appendChild(deleteButton);
+						conditionsListDiv.appendChild(conditionItem);
+					});
+				}
+
+				// --- 初始化 ---
+				renderConditions();
+			});
+		</script>
 	</body>
 </html>

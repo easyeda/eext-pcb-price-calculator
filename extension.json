@@ -1,8 +1,8 @@
 {
 	"name": "pro-api-sdk",
-	"uuid": "",
+	"uuid": "6077dc5ce8194783a51f4a18d95d11a5",
 	"displayName": "PRO API SDK",
-	"description": "嘉立创EDA & EasyEDA 专业版扩展 API 开发工具",
+	"description": "PCB离线计算工具",
 	"version": "1.0.0",
 	"publisher": "JLCEDA <support@lceda.cn>",
 	"engines": {
@@ -24,41 +24,17 @@
 	"entry": "./dist/index",
 	"dependentExtensions": {},
 	"headerMenus": {
-		"home": [
-			{
-				"id": "API SDK",
-				"title": "API SDK",
-				"menuItems": [
-					{
-						"id": "About",
-						"title": "About...",
-						"registerFn": "about"
-					}
-				]
-			}
-		],
-		"sch": [
-			{
-				"id": "API SDK",
-				"title": "API SDK",
-				"menuItems": [
-					{
-						"id": "About",
-						"title": "About...",
-						"registerFn": "about"
-					}
-				]
-			}
-		],
+		"home": [],
+		"sch": [],
 		"pcb": [
 			{
-				"id": "API SDK",
-				"title": "API SDK",
+				"id": "PCB_PRICE",
+				"title": "计价工具",
 				"menuItems": [
 					{
-						"id": "About",
-						"title": "About...",
-						"registerFn": "about"
+						"id": "PRICE",
+						"title": "打开",
+						"registerFn": "PcbPrice"
 					}
 				]
 			}
