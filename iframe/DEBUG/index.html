@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>JS调试器</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: 'Consolas', 'Monaco', monospace;
+				background: #1e1e1e;
+				color: #d4d4d4;
+				height: 100vh;
+				display: flex;
+				flex-direction: column;
+			}
+
+			.container {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				padding: 20px;
+				max-width: 1200px;
+				width: 100%;
+				margin: 0 auto;
+			}
+
+			.editor {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				gap: 15px;
+			}
+
+			textarea {
+				flex: 1;
+				background: #252526;
+				border: 1px solid #3e3e42;
+				color: #d4d4d4;
+				padding: 15px;
+				font-family: inherit;
+				font-size: 14px;
+				resize: none;
+				outline: none;
+				border-radius: 4px;
+				line-height: 1.5;
+			}
+
+			textarea:focus {
+				border-color: #007acc;
+			}
+
+			.controls {
+				display: flex;
+				gap: 10px;
+			}
+
+			button {
+				background: #007acc;
+				color: white;
+				border: none;
+				padding: 10px 20px;
+				border-radius: 4px;
+				cursor: pointer;
+				font-family: inherit;
+				font-size: 14px;
+				transition: background 0.2s;
+			}
+
+			button:hover {
+				background: #005a9e;
+			}
+
+			button:active {
+				transform: translateY(1px);
+			}
+
+			.output {
+				margin-top: 15px;
+				background: #252526;
+				border: 1px solid #3e3e42;
+				border-radius: 4px;
+				padding: 15px;
+				min-height: 100px;
+				max-height: 300px;
+				overflow-y: auto;
+				white-space: pre-wrap;
+				word-wrap: break-word;
+			}
+
+			.output:empty::before {
+				content: '输出结果将显示在这里...';
+				color: #858585;
+			}
+
+			.error {
+				color: #f48771;
+			}
+
+			.log {
+				color: #d4d4d4;
+			}
+
+			.warn {
+				color: #ffd700;
+			}
+
+			.info {
+				color: #4fc3f7;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="editor">
+				<textarea id="codeInput" placeholder="在这里输入JavaScript代码..." autofocus></textarea>
+				<div class="controls">
+					<button id="runBtn">运行 (Ctrl+Enter)</button>
+					<button id="clearBtn">清空</button>
+				</div>
+				<div id="output" class="output"></div>
+			</div>
+		</div>
+
+		<script>
+			const codeInput = document.getElementById('codeInput');
+			const runBtn = document.getElementById('runBtn');
+			const clearBtn = document.getElementById('clearBtn');
+			const output = document.getElementById('output');
+
+			// 重写console方法
+			const originalConsole = {
+				log: console.log,
+				error: console.error,
+				warn: console.warn,
+				info: console.info,
+			};
+
+			function appendOutput(message, type = 'log') {
+				const div = document.createElement('div');
+				div.className = type;
+				div.textContent = message;
+				output.appendChild(div);
+				output.scrollTop = output.scrollHeight;
+			}
+
+			console.log = function (...args) {
+				originalConsole.log.apply(console, args);
+				appendOutput(
+					args
+						.map((arg) => {
+							if (typeof arg === 'object') {
+								return JSON.stringify(arg, null, 2);
+							}
+							return String(arg);
+						})
+						.join(' '),
+					'log',
+				);
+			};
+
+			console.error = function (...args) {
+				originalConsole.error.apply(console, args);
+				appendOutput(args.join(' '), 'error');
+			};
+
+			console.warn = function (...args) {
+				originalConsole.warn.apply(console, args);
+				appendOutput(args.join(' '), 'warn');
+			};
+
+			console.info = function (...args) {
+				originalConsole.info.apply(console, args);
+				appendOutput(args.join(' '), 'info');
+			};
+
+			function runCode() {
+				const code = codeInput.value;
+				if (!code.trim()) return;
+
+				output.innerHTML = '';
+
+				try {
+					// 使用Function构造函数创建一个隔离的作用域
+					const func = new Function(code);
+					func();
+				} catch (error) {
+					appendOutput(`错误: ${error.message}`, 'error');
+				}
+			}
+
+			function clearAll() {
+				codeInput.value = '';
+				output.innerHTML = '';
+				codeInput.focus();
+			}
+
+			runBtn.addEventListener('click', runCode);
+			clearBtn.addEventListener('click', clearAll);
+
+			// 支持Ctrl+Enter快捷键运行
+			codeInput.addEventListener('keydown', (e) => {
+				if (e.ctrlKey && e.key === 'Enter') {
+					e.preventDefault();
+					runCode();
+				}
+			});
+
+			// 支持Tab缩进
+			codeInput.addEventListener('keydown', (e) => {
+				if (e.key === 'Tab') {
+					e.preventDefault();
+					const start = codeInput.selectionStart;
+					const end = codeInput.selectionEnd;
+					codeInput.value = codeInput.value.substring(0, start) + '    ' + codeInput.value.substring(end);
+					codeInput.selectionStart = codeInput.selectionEnd = start + 4;
+				}
+			});
+
+			// 初始焦点
+			codeInput.focus();
+		</script>
+	</body>
+</html>

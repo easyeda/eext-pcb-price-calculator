@@ -35,6 +35,11 @@
 						"id": "PRICE",
 						"title": "打开",
 						"registerFn": "PcbPrice"
+					},
+					{
+						"id": "debug",
+						"title": "调试",
+						"registerFn": "Debug"
 					}
 				]
 			}

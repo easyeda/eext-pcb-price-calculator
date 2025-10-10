@@ -65,7 +65,8 @@
 			.btn-primary,
 			.btn-success,
 			.btn-danger,
-			.btn-secondary {
+			.btn-secondary,
+			.btn-warning {
 				padding: 10px 15px;
 				border: none;
 				border-radius: 4px;
@@ -73,6 +74,7 @@
 				cursor: pointer;
 				font-size: 14px;
 				transition: background-color 0.2s;
+				margin-right: 5px; /* 为按钮组增加间距 */
 			}
 
 			.btn-primary {
@@ -91,8 +93,6 @@
 
 			.btn-danger {
 				background-color: #dc3545;
-				padding: 5px 10px;
-				font-size: 12px;
 			}
 			.btn-danger:hover {
 				background-color: #c82333;
@@ -103,6 +103,14 @@
 			}
 			.btn-secondary:hover {
 				background-color: #5a6268;
+			}
+
+			.btn-warning {
+				background-color: #ffc107;
+				color: #212529;
+			}
+			.btn-warning:hover {
+				background-color: #e0a800;
 			}
 
 			/* --- 特定元素样式 --- */
@@ -205,6 +213,19 @@
 			#openConfigBtn:hover {
 				color: #0056b3;
 			}
+
+			/* --- 新增：规则管理区域样式 --- */
+			#savedRulesContainer {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+			#savedRulesSelect {
+				flex-grow: 1;
+			}
+			.rule-management-buttons {
+				margin-top: 10px;
+			}
 		</style>
 	</head>
 	<body>
@@ -231,7 +252,7 @@
 					<input type="number" id="height" step="0.01" placeholder="单位: mm" />
 				</div>
 				<div class="form-group">
-					<label for="basePrice">基础单价:</label>
+					<label for="basePrice">基础单价(元):</label>
 					<input type="number" id="basePrice" value="0.01" step="0.001" placeholder="单位: 元/mm²" />
 				</div>
 
@@ -276,14 +297,29 @@
 				<div class="rule-management">
 					<h3>计价规则管理</h3>
 					<div class="form-group">
-						<label for="ruleName">规则名称:</label>
+						<label for="ruleName">当前规则名称:</label>
 						<input type="text" id="ruleName" placeholder="例如: 标准双面板打样" />
 					</div>
 					<div class="form-group">
 						<label></label>
-						<button id="exportRuleBtn" class="btn-secondary">导出当前规则</button>
-						<button id="importRuleBtn" class="btn-secondary">导入规则文件</button>
-						<input type="file" id="importRuleFile" accept=".json" style="display: none" />
+						<!-- 修改：保存按钮 -->
+						<button id="saveRuleBtn" class="btn-secondary">保存当前规则</button>
+					</div>
+
+					<!-- 新增：规则加载与管理区域 -->
+					<div class="form-group">
+						<label>已保存的规则:</label>
+						<div id="savedRulesContainer">
+							<select id="savedRulesSelect">
+								<option value="">-- 请选择要加载的规则 --</option>
+							</select>
+							<button id="loadRuleBtn" class="btn-primary">加载</button>
+							<button id="deleteRuleBtn" class="btn-danger">删除</button>
+						</div>
+					</div>
+					<div class="rule-management-buttons">
+						<button id="refreshRulesBtn" class="btn-secondary">刷新列表</button>
+						<button id="clearAllRulesBtn" class="btn-warning">清空所有规则</button>
 					</div>
 				</div>
 			</div>
@@ -309,16 +345,21 @@
 				const addConditionBtn = document.getElementById('addConditionBtn');
 				const conditionsListDiv = document.getElementById('conditionsList');
 				const ruleNameInput = document.getElementById('ruleName');
-				const exportRuleBtn = document.getElementById('exportRuleBtn');
-				const importRuleBtn = document.getElementById('importRuleBtn');
-				const importRuleFileInput = document.getElementById('importRuleFile');
+
+				// --- 新增/修改的DOM元素 ---
+				const saveRuleBtn = document.getElementById('saveRuleBtn'); // 原 exportRuleBtn
+				const savedRulesSelect = document.getElementById('savedRulesSelect');
+				const loadRuleBtn = document.getElementById('loadRuleBtn');
+				const deleteRuleBtn = document.getElementById('deleteRuleBtn');
+				const refreshRulesBtn = document.getElementById('refreshRulesBtn');
+				const clearAllRulesBtn = document.getElementById('clearAllRulesBtn');
 
 				// --- 数据存储 ---
 				let priceConditions = []; // 存储动态计价条件的数组
 
 				// --- 事件监听器 ---
 
-				// 1. 获取尺寸按钮的点击事件
+				// 1. 获取尺寸按钮的点击事件 (无变化)
 				getDimensionsBtn.addEventListener('click', function () {
 					statusMessage.textContent = '正在尝试从EDA获取尺寸...';
 					statusMessage.style.color = '#007bff';
@@ -350,7 +391,7 @@
 						});
 				});
 
-				// 2. 计算最终价格按钮的点击事件
+				// 2. 计算最终价格按钮的点击事件 (无变化)
 				calculateBtn.addEventListener('click', function () {
 					const width = parseFloat(widthInput.value);
 					const height = parseFloat(heightInput.value);
@@ -387,10 +428,13 @@
 				});
 
 				// --- 对话框控制 ---
-				openConfigBtn.addEventListener('click', () => configDialog.showModal());
+				openConfigBtn.addEventListener('click', () => {
+					configDialog.showModal();
+					refreshRulesList(); // 每次打开对话框时刷新规则列表
+				});
 				closeDialogBtn.addEventListener('click', () => configDialog.close());
 
-				// 3. 添加计价条件按钮的点击事件 (在对话框内)
+				// 3. 添加计价条件按钮的点击事件 (无变化)
 				addConditionBtn.addEventListener('click', function () {
 					const name = document.getElementById('conditionName').value;
 					const type = document.getElementById('conditionType').value;
@@ -411,13 +455,19 @@
 					renderConditions();
 				});
 
-				// 4. 导出规则按钮的点击事件 (在对话框内)
-				exportRuleBtn.addEventListener('click', function () {
-					const ruleName = ruleNameInput.value.trim() || '未命名计价规则';
-					const basePrice = parseFloat(basePriceInput.value);
+				// --- 修改的核心业务逻辑 ---
 
+				// 4. 保存规则按钮的点击事件 (原导出)
+				// 修改: 移除 async/await，改为同步调用
+				saveRuleBtn.addEventListener('click', function () {
+					const ruleName = ruleNameInput.value.trim();
+					if (!ruleName) {
+						alert('请先输入规则名称！');
+						return;
+					}
+					const basePrice = parseFloat(basePriceInput.value);
 					if (isNaN(basePrice)) {
-						statusMessage.textContent = '导出失败：请先设置有效的基础单价。';
+						statusMessage.textContent = '保存失败：请先设置有效的基础单价。';
 						statusMessage.style.color = 'red';
 						return;
 					}
@@ -429,60 +479,111 @@
 						exportDate: new Date().toLocaleString('zh-CN'),
 					};
 
-					const dataStr = JSON.stringify(ruleData, null, 2);
-					const dataBlob = new Blob([dataStr], { type: 'application/json' });
-					const url = URL.createObjectURL(dataBlob);
-
-					const link = document.createElement('a');
-					link.href = url;
-					link.download = `${ruleName}.json`;
-					document.body.appendChild(link);
-					link.click();
-					document.body.removeChild(link);
-
-					URL.revokeObjectURL(url);
-
-					statusMessage.textContent = `规则 "${ruleName}" 已成功导出！`;
-					statusMessage.style.color = 'green';
+					try {
+						// 修改: 直接调用函数，不使用 await
+						const success = eda.sys_Storage.setExtensionUserConfig(ruleName, ruleData);
+						if (success) {
+							statusMessage.textContent = `规则 "${ruleName}" 已成功保存！`;
+							statusMessage.style.color = 'green';
+							refreshRulesList(); // 保存后刷新列表
+						} else {
+							throw new Error('保存操作返回失败');
+						}
+					} catch (error) {
+						statusMessage.textContent = `保存失败: ${error.message}`;
+						statusMessage.style.color = 'red';
+						console.error('保存规则失败:', error);
+					}
 				});
 
-				// 5. 导入规则按钮的点击事件 (在对话框内)
-				importRuleBtn.addEventListener('click', function () {
-					importRuleFileInput.click();
-				});
+				// 5. 加载规则按钮的点击事件
+				// 修改: 移除 async/await 和 .then()，改为同步调用
+				loadRuleBtn.addEventListener('click', function () {
+					const selectedRuleName = savedRulesSelect.value;
+					if (!selectedRuleName) {
+						alert('请先从下拉框中选择一个规则！');
+						return;
+					}
 
-				// 6. 文件选择后的处理事件
-				importRuleFileInput.addEventListener('change', function (event) {
-					const file = event.target.files[0];
-					if (!file) return;
-
-					const reader = new FileReader();
-					reader.onload = function (e) {
-						try {
-							const ruleData = JSON.parse(e.target.result);
-
-							if (!ruleData.hasOwnProperty('basePrice') || !ruleData.hasOwnProperty('conditions')) {
-								throw new Error('文件格式不正确，缺少必要字段。');
-							}
-
+					try {
+						// 修改: 直接调用函数，不使用 .then()
+						const ruleData = eda.sys_Storage.getExtensionUserConfig(selectedRuleName);
+						if (ruleData) {
+							// 将数据应用到界面
 							ruleNameInput.value = ruleData.ruleName || '';
 							basePriceInput.value = ruleData.basePrice;
-							priceConditions = ruleData.conditions;
-
+							priceConditions = ruleData.conditions || [];
 							renderConditions();
 
-							statusMessage.textContent = `成功导入规则 "${ruleData.ruleName || '未命名'}"！`;
+							statusMessage.textContent = `成功加载规则 "${selectedRuleName}"！`;
 							statusMessage.style.color = 'green';
-						} catch (error) {
-							statusMessage.textContent = `导入失败：${error.message}`;
+						} else {
+							statusMessage.textContent = `加载失败：找不到规则 "${selectedRuleName}"`;
 							statusMessage.style.color = 'red';
-							console.error('导入规则失败:', error);
 						}
-					};
-					reader.readAsText(file);
-
-					event.target.value = '';
+					} catch (error) {
+						statusMessage.textContent = `加载失败: ${error.message}`;
+						statusMessage.style.color = 'red';
+						console.error('加载规则失败:', error);
+					}
 				});
+
+				// 6. 删除规则按钮的点击事件
+				// 修改: 移除 async/await，改为同步调用
+				deleteRuleBtn.addEventListener('click', function () {
+					const selectedRuleName = savedRulesSelect.value;
+					if (!selectedRuleName) {
+						alert('请先从下拉框中选择一个要删除的规则！');
+						return;
+					}
+
+					if (!confirm(`确定要删除规则 "${selectedRuleName}" 吗？此操作不可恢复。`)) {
+						return;
+					}
+
+					try {
+						// 修改: 直接调用函数，不使用 await
+						const success = eda.sys_Storage.deleteExtensionUserConfig(selectedRuleName);
+						if (success) {
+							statusMessage.textContent = `规则 "${selectedRuleName}" 已删除。`;
+							statusMessage.style.color = 'orange';
+							refreshRulesList(); // 删除后刷新列表
+						} else {
+							throw new Error('删除操作返回失败');
+						}
+					} catch (error) {
+						statusMessage.textContent = `删除失败: ${error.message}`;
+						statusMessage.style.color = 'red';
+						console.error('删除规则失败:', error);
+					}
+				});
+
+				// 7. 清空所有规则按钮的点击事件
+				// 修改: 移除 async/await，改为同步调用
+				clearAllRulesBtn.addEventListener('click', function () {
+					if (!confirm('确定要清空所有已保存的计价规则吗？此操作不可恢复！')) {
+						return;
+					}
+
+					try {
+						// 修改: 直接调用函数，不使用 await
+						const success = eda.sys_Storage.clearExtensionAllUserConfigs();
+						if (success) {
+							statusMessage.textContent = '所有计价规则已清空。';
+							statusMessage.style.color = 'orange';
+							refreshRulesList(); // 清空后刷新列表
+						} else {
+							throw new Error('清空操作返回失败');
+						}
+					} catch (error) {
+						statusMessage.textContent = `清空失败: ${error.message}`;
+						statusMessage.style.color = 'red';
+						console.error('清空规则失败:', error);
+					}
+				});
+
+				// 8. 刷新列表按钮的点击事件
+				refreshRulesBtn.addEventListener('click', refreshRulesList);
 
 				// --- 辅助函数 ---
 
@@ -517,8 +618,42 @@
 					});
 				}
 
+				// --- 修改的核心辅助函数 ---
+
+				/**
+				 * 从存储中获取所有规则并刷新下拉框
+				 * 修改: 移除 async/await，改为同步调用
+				 */
+				function refreshRulesList() {
+					try {
+						// 修改: 直接调用函数，不使用 await
+						const allRules = eda.sys_Storage.getExtensionAllUserConfigs();
+						// 清空现有选项
+						savedRulesSelect.innerHTML = '<option value="">-- 请选择要加载的规则 --</option>';
+
+						// 按名称排序
+						const sortedRuleNames = Object.keys(allRules).sort();
+
+						if (sortedRuleNames.length === 0) {
+							savedRulesSelect.innerHTML = '<option value="">-- 暂无已保存的规则 --</option>';
+						} else {
+							sortedRuleNames.forEach((ruleName) => {
+								const option = document.createElement('option');
+								option.value = ruleName;
+								option.textContent = ruleName;
+								savedRulesSelect.appendChild(option);
+							});
+						}
+					} catch (error) {
+						console.error('刷新规则列表失败:', error);
+						statusMessage.textContent = '刷新规则列表失败，请查看控制台。';
+						statusMessage.style.color = 'red';
+					}
+				}
+
 				// --- 初始化 ---
 				renderConditions();
+				// 页面加载时不需要立即刷新列表，在打开对话框时刷新即可
 			});
 		</script>
 	</body>
