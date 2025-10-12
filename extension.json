@@ -35,11 +35,6 @@
 						"id": "PRICE",
 						"title": "打开计价工具...",
 						"registerFn": "PcbPrice"
-					},
-					{
-						"id": "debug",
-						"title": "调试",
-						"registerFn": "Debug"
 					}
 				]
 			}
