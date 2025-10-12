@@ -1,51 +1,48 @@
-[简体中文](#) | [English](./README.en.md) | [繁體中文](./README.zh-Hant.md) | [日本語](./README.ja.md) | [Русский](./README.ru.md)
+# eext-pcb-price-calculator
 
-# pro-api-sdk
+EasyEDA Pro 扩展：离线 PCB 价格计算器
 
-嘉立创EDA & EasyEDA 专业版扩展 API 开发工具
+## 简介
 
-<a href="https://github.com/easyeda/pro-api-sdk" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/github/stars/easyeda/pro-api-sdk" alt="GitHub Repo Stars" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>&nbsp;<a href="https://github.com/easyeda/pro-api-sdk/issues" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/github/issues/easyeda/pro-api-sdk" alt="GitHub Issues" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>&nbsp;<a href="https://github.com/easyeda/pro-api-sdk" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/github/repo-size/easyeda/pro-api-sdk" alt="GitHub Repo Size" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>&nbsp;<a href="https://choosealicense.com/licenses/apache-2.0/" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/github/license/easyeda/pro-api-sdk" alt="GitHub License" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>&nbsp;<a href="https://www.npmjs.com/package/@jlceda/pro-api-types" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/npm/v/%40jlceda%2Fpro-api-types?label=pro-api-types" alt="NPM Version" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>&nbsp;<a href="https://www.npmjs.com/package/@jlceda/pro-api-types" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/npm/d18m/%40jlceda%2Fpro-api-types" alt="NPM Downloads" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>
+本项目为 EasyEDA Pro 的扩展，提供离线 PCB 价格计算功能。用户可在 EasyEDA Pro 内部通过菜单访问该工具，无需联网即可估算 PCB 制作费用。
 
-> [!NOTE]
->
-> 详细开发文档请访问：[https://prodocs.lceda.cn/cn/api/guide/](https://prodocs.lceda.cn/cn/api/guide/)
+## 功能特性
 
-## 进入开发
+- 支持输入板子尺寸、层数、数量等参数
+- 实时计算并显示 PCB 价格
+- 结果可复制或导出
+- 完全离线运行，无需网络连接
+- 多语言界面（支持中英文等）
 
-本开发工具组包含了用于开发 [嘉立创EDA专业版](https://pro.lceda.cn/) 扩展包的所有环境和工具，并内置了 Prettier 和 ESLint 的推荐规则。
+## 使用方法
 
-1. 克隆 [pro-api-sdk](https://github.com/easyeda/pro-api-sdk) 项目仓库到本地
+1. 在 EasyEDA Pro 中导入本扩展（`.eext` 文件）。
+2. 通过顶部菜单栏的“PCB 价格计算器”入口打开工具。
+3. 在弹出的 IFrame 界面中填写 PCB 参数（如长宽、层数、数量等）。
+4. 点击“计算”按钮，查看价格估算结果。
+5. 可复制结果或导出为文件。
 
-    Gitee:
+## 参数说明
 
-    ```shell
-    git clone --depth=1 https://gitee.com/jlceda/pro-api-sdk.git
-    ```
+- **尺寸**：输入 PCB 的长和宽（单位：mm）。
+- **层数**：选择 PCB 层数（如 2 层、4 层等 框选PCB之后会自动获取）。
+- **数量**：输入需要生产的 PCB 数量。
+- **其他选项**：如表面处理、阻焊颜色等（如有）。
 
-    GitHub:
+## 本地化
 
-    ```shell
-    git clone --depth=1 https://github.com/easyeda/pro-api-sdk.git
-    ```
+支持多语言界面，语言可根据 EasyEDA Pro 设置自动切换。
 
-2. 初始化开发环境（安装依赖）
+## 技术说明
 
-    ```shell
-    npm install
-    ```
+- 前端界面基于 `iframe/index.html`，使用原生 HTML/CSS/JS 编写。
+- 通过 EasyEDA Pro 提供的 `eda` API 与主程序交互。
+- 所有计算逻辑均在本地浏览器端完成，无需联网。
 
-3. 进行些许变更 ...
+## 开发与构建
 
-4. 编译扩展包
+请参考 [Copilot Instructions](./.github/copilot-instructions.md) 获取详细开发、构建与打包流程说明。
 
-    ```shell
-    npm run build
-    ```
+## 许可证
 
-5. 在 嘉立创EDA专业版 中安装生成在 `./build/dist/` 下的扩展包
-
-## 开源许可
-
-<a href="https://choosealicense.com/licenses/apache-2.0/" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/github/license/easyeda/pro-api-sdk" alt="GitHub License" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>
-
-本开发工具组使用 [Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/) 开源许可协议，你仅可以将 **嘉立创EDA**、**EasyEDA** 商标信息用于依托于本工具组开发的扩展包的 **功能描述部分** 和 **开源发布的标题部分**。
+本项目遵循开源协议，详情见 LICENSE 文件。

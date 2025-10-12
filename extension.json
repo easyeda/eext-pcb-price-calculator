@@ -33,7 +33,7 @@
 				"menuItems": [
 					{
 						"id": "PRICE",
-						"title": "打开",
+						"title": "打开计价工具...",
 						"registerFn": "PcbPrice"
 					},
 					{
