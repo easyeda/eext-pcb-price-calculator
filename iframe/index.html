@@ -3,45 +3,186 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>PCB 动态计价工具</title>
+		<title>PCB离线计价工具</title>
 		<style>
-			/* --- 全局与布局样式 --- */
-			body {
-				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+			* {
 				margin: 0;
-				padding: 15px;
-				background-color: #f4f7f6;
-				color: #333;
-				height: 100vh;
+				padding: 0;
 				box-sizing: border-box;
 			}
 
-			#app {
-				display: flex;
-				gap: 20px;
-				height: 100%;
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+				background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+				min-height: 100vh;
+				color: #2c3e50;
 			}
 
-			.section {
-				background-color: #fff;
+			.container {
+				display: flex;
+				height: 100vh;
+				background: white;
+			}
+
+			/* 侧边栏样式 */
+			.sidebar {
+				width: 260px;
+				background: linear-gradient(180deg, #2c5aa0 0%, #1e3c72 100%);
+				color: white;
 				padding: 20px;
+				overflow-y: auto;
+				box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+			}
+
+			.sidebar h3 {
+				margin-bottom: 15px;
+				font-size: 16px;
+				opacity: 0.9;
+			}
+
+			.rule-item {
+				background: rgba(255, 255, 255, 0.1);
+				padding: 12px;
+				margin-bottom: 10px;
 				border-radius: 8px;
-				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-				flex: 1; /* 三个部分平均分配空间 */
+				cursor: pointer;
+				transition: all 0.3s ease;
+				border: 2px solid transparent;
+			}
+
+			.rule-item:hover {
+				background: rgba(255, 255, 255, 0.2);
+				transform: translateX(5px);
+			}
+
+			.rule-item.active {
+				background: rgba(255, 255, 255, 0.25);
+				border-color: #4fc3f7;
+			}
+
+			.rule-name {
+				font-weight: 500;
+				margin-bottom: 5px;
+			}
+
+			.rule-type {
+				font-size: 12px;
+				opacity: 0.8;
+			}
+
+			/* 主内容区域 */
+			.main-content {
+				flex: 1;
 				display: flex;
 				flex-direction: column;
+				overflow: hidden;
 			}
 
-			.section h2 {
-				margin-top: 0;
-				font-size: 1.2em;
-				color: #0056b3;
-				border-bottom: 2px solid #e9ecef;
-				padding-bottom: 10px;
+			/* 顶部工具栏 */
+			.toolbar {
+				background: white;
+				padding: 15px 20px;
+				border-bottom: 1px solid #e0e6ed;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+			}
+
+			.toolbar-left {
+				display: flex;
+				gap: 10px;
+			}
+
+			.btn {
+				padding: 8px 16px;
+				border: none;
+				border-radius: 6px;
+				cursor: pointer;
+				font-size: 14px;
+				transition: all 0.3s ease;
+				font-weight: 500;
+			}
+
+			.btn-primary {
+				background: #2c5aa0;
+				color: white;
+			}
+
+			.btn-primary:hover {
+				background: #1e3c72;
+				transform: translateY(-2px);
+				box-shadow: 0 4px 8px rgba(44, 90, 160, 0.3);
+			}
+
+			.btn-secondary {
+				background: #f0f4f8;
+				color: #2c5aa0;
+				border: 1px solid #2c5aa0;
+			}
+
+			.btn-secondary:hover {
+				background: #e8f0fe;
+			}
+
+			.btn-danger {
+				background: #ff5252;
+				color: white;
+			}
+
+			.btn-danger:hover {
+				background: #ff1744;
+			}
+
+			/* 内容区域 */
+			.content-area {
+				flex: 1;
+				display: flex;
+				overflow: hidden;
+			}
+
+			.left-panel,
+			.right-panel {
+				flex: 1;
+				padding: 20px;
+				overflow-y: auto;
+			}
+
+			.left-panel {
+				border-right: 1px solid #e0e6ed;
+				background: #fafbfc;
+			}
+
+			.right-panel {
+				background: white;
+			}
+
+			/* 表单样式 */
+			.form-section {
+				background: white;
+				border-radius: 10px;
+				padding: 20px;
 				margin-bottom: 20px;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 			}
 
-			/* --- 表单与控件样式 --- */
+			.form-section h3 {
+				color: #2c5aa0;
+				margin-bottom: 15px;
+				font-size: 18px;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.form-section h3::before {
+				content: '';
+				width: 4px;
+				height: 20px;
+				background: #2c5aa0;
+				border-radius: 2px;
+			}
+
 			.form-group {
 				margin-bottom: 15px;
 			}
@@ -49,612 +190,1096 @@
 			.form-group label {
 				display: block;
 				margin-bottom: 5px;
+				color: #5a6c7d;
+				font-size: 14px;
 				font-weight: 500;
 			}
 
-			.form-group input,
-			.form-group select {
+			.form-control {
 				width: 100%;
-				padding: 8px 10px;
-				border: 1px solid #ccc;
-				border-radius: 4px;
-				box-sizing: border-box;
-			}
-
-			/* --- 按钮样式 --- */
-			.btn-primary,
-			.btn-success,
-			.btn-danger,
-			.btn-secondary,
-			.btn-warning {
-				padding: 10px 15px;
-				border: none;
-				border-radius: 4px;
-				color: white;
-				cursor: pointer;
+				padding: 8px 12px;
+				border: 1px solid #d0d7de;
+				border-radius: 6px;
 				font-size: 14px;
-				transition: background-color 0.2s;
-				margin-right: 5px; /* 为按钮组增加间距 */
+				transition: all 0.3s ease;
 			}
 
-			.btn-primary {
-				background-color: #007bff;
-			}
-			.btn-primary:hover {
-				background-color: #0056b3;
-			}
-
-			.btn-success {
-				background-color: #28a745;
-			}
-			.btn-success:hover {
-				background-color: #218838;
+			.form-control:focus {
+				outline: none;
+				border-color: #2c5aa0;
+				box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
 			}
 
-			.btn-danger {
-				background-color: #dc3545;
-			}
-			.btn-danger:hover {
-				background-color: #c82333;
-			}
-
-			.btn-secondary {
-				background-color: #6c757d;
-			}
-			.btn-secondary:hover {
-				background-color: #5a6268;
-			}
-
-			.btn-warning {
-				background-color: #ffc107;
-				color: #212529;
-			}
-			.btn-warning:hover {
-				background-color: #e0a800;
-			}
-
-			/* --- 特定元素样式 --- */
-			#statusMessage {
-				margin-top: 15px;
-				font-size: 0.9em;
-			}
-
-			#finalPrice {
-				margin-top: 20px;
-				padding: 15px;
-				background-color: #e9ecef;
-				border-radius: 4px;
-				font-size: 0.9em;
-				line-height: 1.6;
-			}
-
-			/* --- 配置对话框样式 --- */
-			#configDialog {
-				border: 1px solid #ccc;
-				border-radius: 8px;
-				padding: 0;
-				box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-				width: 600px;
-				max-width: 90vw;
-			}
-
-			#configDialog::backdrop {
-				background-color: rgba(0, 0, 0, 0.5);
-			}
-
-			.dialog-header {
+			.input-group {
 				display: flex;
-				justify-content: space-between;
+				gap: 10px;
 				align-items: center;
-				padding: 15px 20px;
-				background-color: #007bff;
-				color: white;
-				border-top-left-radius: 8px;
-				border-top-right-radius: 8px;
 			}
 
-			.dialog-header h3 {
-				margin: 0;
+			.input-group .form-control {
+				flex: 1;
 			}
 
-			.close-btn {
-				background: none;
-				border: none;
-				color: white;
-				font-size: 1.5em;
-				cursor: pointer;
-				line-height: 1;
+			.input-group .unit {
+				color: #5a6c7d;
+				font-size: 14px;
+				min-width: 40px;
 			}
 
-			.dialog-body {
-				padding: 20px;
-				max-height: 70vh;
-				overflow-y: auto;
-			}
-
-			.dialog-body h3 {
-				border-bottom: 1px solid #eee;
-				padding-bottom: 10px;
-				margin-top: 0;
-			}
-
-			#conditionsList {
-				margin-top: 20px;
-			}
-
-			.condition-item {
+			/* 工艺项目样式 */
+			.process-item {
 				display: flex;
-				justify-content: space-between;
 				align-items: center;
 				padding: 10px;
-				background-color: #f8f9fa;
-				border: 1px solid #dee2e6;
+				background: #f8f9fa;
+				border-radius: 6px;
+				margin-bottom: 10px;
+				transition: all 0.3s ease;
+			}
+
+			.process-item:hover {
+				background: #e8f0fe;
+			}
+
+			.process-name {
+				flex: 1;
+				font-weight: 500;
+				color: #2c3e50;
+			}
+
+			.process-control {
+				flex: 2;
+				display: flex;
+				gap: 10px;
+				align-items: center;
+			}
+
+			.process-actions {
+				display: flex;
+				gap: 5px;
+			}
+
+			.icon-btn {
+				width: 30px;
+				height: 30px;
+				border: none;
+				background: transparent;
+				color: #5a6c7d;
+				cursor: pointer;
 				border-radius: 4px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: all 0.3s ease;
+			}
+
+			.icon-btn:hover {
+				background: #e8f0fe;
+				color: #2c5aa0;
+			}
+
+			/* 条件规则样式 */
+			.condition-rule {
+				background: #f8f9fa;
+				border: 1px solid #e0e6ed;
+				border-radius: 8px;
+				padding: 15px;
+				margin-bottom: 15px;
+				position: relative;
+			}
+
+			.condition-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
 				margin-bottom: 10px;
 			}
 
-			.rule-management {
-				margin-top: 30px;
-				padding-top: 20px;
-				border-top: 1px solid #ccc;
+			.condition-title {
+				font-weight: 500;
+				color: #2c5aa0;
 			}
 
-			/* --- 齿轮按钮样式 --- */
-			#openConfigBtn {
-				position: absolute;
-				top: 20px;
-				right: 20px;
-				background: none;
+			.condition-body {
+				display: flex;
+				gap: 10px;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+
+			.condition-select,
+			.condition-input {
+				padding: 6px 10px;
+				border: 1px solid #d0d7de;
+				border-radius: 4px;
+				font-size: 14px;
+			}
+
+			/* 模态框样式 */
+			.modal {
+				display: none;
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.5);
+				z-index: 1000;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.modal.show {
+				display: flex;
+			}
+
+			.modal-content {
+				background: white;
+				border-radius: 12px;
+				padding: 30px;
+				max-width: 500px;
+				width: 90%;
+				box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+				animation: slideIn 0.3s ease;
+			}
+
+			@keyframes slideIn {
+				from {
+					transform: translateY(-50px);
+					opacity: 0;
+				}
+				to {
+					transform: translateY(0);
+					opacity: 1;
+				}
+			}
+
+			.modal-header {
+				margin-bottom: 20px;
+			}
+
+			.modal-header h3 {
+				color: #2c5aa0;
+				font-size: 20px;
+			}
+
+			.modal-body {
+				margin-bottom: 20px;
+			}
+
+			.modal-footer {
+				display: flex;
+				justify-content: flex-end;
+				gap: 10px;
+			}
+
+			/* 标签页样式 */
+			.tabs {
+				display: flex;
+				border-bottom: 2px solid #e0e6ed;
+				margin-bottom: 20px;
+			}
+
+			.tab {
+				padding: 10px 20px;
+				background: transparent;
 				border: none;
-				font-size: 1.5em;
+				color: #5a6c7d;
 				cursor: pointer;
-				color: #6c757d;
-			}
-			#openConfigBtn:hover {
-				color: #0056b3;
+				font-size: 14px;
+				font-weight: 500;
+				position: relative;
+				transition: all 0.3s ease;
 			}
 
-			/* --- 新增：规则管理区域样式 --- */
-			#savedRulesContainer {
+			.tab:hover {
+				color: #2c5aa0;
+			}
+
+			.tab.active {
+				color: #2c5aa0;
+			}
+
+			.tab.active::after {
+				content: '';
+				position: absolute;
+				bottom: -2px;
+				left: 0;
+				right: 0;
+				height: 2px;
+				background: #2c5aa0;
+			}
+
+			.tab-content {
+				display: none;
+			}
+
+			.tab-content.active {
+				display: block;
+			}
+
+			/* 颜色选择器样式 */
+			.color-picker-wrapper {
 				display: flex;
 				align-items: center;
 				gap: 10px;
 			}
-			#savedRulesSelect {
-				flex-grow: 1;
+
+			.color-picker {
+				width: 50px;
+				height: 35px;
+				border: 2px solid #d0d7de;
+				border-radius: 6px;
+				cursor: pointer;
+				transition: all 0.3s ease;
 			}
-			.rule-management-buttons {
-				margin-top: 10px;
+
+			.color-picker:hover {
+				border-color: #2c5aa0;
+			}
+
+			/* 价格显示 */
+			.price-display {
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				color: white;
+				padding: 20px;
+				border-radius: 10px;
+				text-align: center;
+				margin-top: 20px;
+			}
+
+			.price-label {
+				font-size: 14px;
+				opacity: 0.9;
+				margin-bottom: 5px;
+			}
+
+			.price-value {
+				font-size: 32px;
+				font-weight: bold;
+			}
+
+			/* 响应式设计 */
+			@media (max-width: 768px) {
+				.sidebar {
+					width: 200px;
+				}
+
+				.content-area {
+					flex-direction: column;
+				}
+
+				.left-panel,
+				.right-panel {
+					border-right: none;
+					border-bottom: 1px solid #e0e6ed;
+				}
 			}
 		</style>
 	</head>
 	<body>
-		<div id="app">
-			<!-- 第一部分：从EDA获取尺寸 -->
-			<div class="section">
-				<h2>1. 获取PCB尺寸</h2>
-				<p>请先框选需要计价的PCB，然后点击下方按钮自动获取宽度和高度。</p>
-				<button id="getDimensionsBtn" class="btn-primary">获取选中图元尺寸</button>
-				<div id="statusMessage"></div>
-			</div>
-
-			<!-- 第二部分：基础信息和动态计价 -->
-			<div class="section" style="position: relative">
-				<h2>2. 配置计价参数</h2>
-				<button id="openConfigBtn" title="高级配置">⚙️</button>
-
-				<div class="form-group">
-					<label for="width">宽度:</label>
-					<input type="number" id="width" step="0.01" placeholder="单位: mm" />
+		<div class="container">
+			<!-- 侧边栏 -->
+			<aside class="sidebar">
+				<h3>计价规则</h3>
+				<div id="rulesList">
+					<div class="rule-item active" data-rule-id="default">
+						<div class="rule-name">默认规则</div>
+						<div class="rule-type">按面积计价</div>
+					</div>
 				</div>
-				<div class="form-group">
-					<label for="height">高度:</label>
-					<input type="number" id="height" step="0.01" placeholder="单位: mm" />
-				</div>
-				<div class="form-group">
-					<label for="basePrice">基础单价(元):</label>
-					<input type="number" id="basePrice" value="0.01" step="0.001" placeholder="单位: 元/mm²" />
+				<button class="btn btn-secondary" style="width: 100%; margin-top: 20px" onclick="showNewRuleModal()">+ 新建规则</button>
+			</aside>
+
+			<!-- 主内容区 -->
+			<main class="main-content">
+				<!-- 工具栏 -->
+				<div class="toolbar">
+					<div class="toolbar-left">
+						<button class="btn btn-primary" onclick="GetPcbInfomation()">📐 识别PCB信息</button>
+						<button class="btn btn-secondary" onclick="calculatePrice()">💰 计算价格</button>
+					</div>
+					<div class="toolbar-right">
+						<button class="btn btn-secondary" onclick="exportRules()">📤 导出规则</button>
+						<button class="btn btn-secondary" onclick="importRules()">📥 导入规则</button>
+					</div>
 				</div>
 
-				<button id="calculateBtn" class="btn-primary" style="margin-top: auto">计算最终价格</button>
-			</div>
+				<!-- 内容区域 -->
+				<div class="content-area">
+					<!-- 左侧面板 - PCB参数 -->
+					<div class="left-panel">
+						<div class="form-section">
+							<h3>基本信息</h3>
 
-			<!-- 第三部分：价格结果 -->
-			<div class="section">
-				<h2>3. 计价结果</h2>
-				<div id="finalPrice" style="color: #888">请先配置参数并点击计算。</div>
+							<div class="form-group">
+								<label for="board-type">板材类别</label>
+								<select id="board-type" class="form-control">
+									<option value="fpc">FPC软板</option>
+									<option value="fr4" selected>FR-4</option>
+									<option value="aluminum">铝基板</option>
+									<option value="copper">铜基板</option>
+									<option value="rogers">罗杰斯高频板</option>
+									<option value="ptfe">铁氟龙高频板</option>
+								</select>
+							</div>
+
+							<div class="form-group">
+								<label>板子尺寸</label>
+								<div class="input-group">
+									<input type="number" id="length-input" class="form-control" placeholder="长" />
+									<span class="unit">CM</span>
+									<input type="number" id="width-input" class="form-control" placeholder="宽" />
+									<span class="unit">CM</span>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label>板子层数</label>
+								<div class="input-group">
+									<input type="number" id="layer-input" class="form-control" />
+									<span class="unit">层</span>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label for="product-type">产品类型</label>
+								<select id="product-type" class="form-control">
+									<option value="others">工业/消费/其他类电子产品</option>
+									<option value="aviation">航空</option>
+									<option value="help">医疗</option>
+								</select>
+							</div>
+
+							<div class="form-group">
+								<label>确认生产稿</label>
+								<div class="input-group">
+									<input type="number" id="verify-group" class="form-control" placeholder="不需要则放空" />
+									<span class="unit">次</span>
+								</div>
+							</div>
+						</div>
+
+						<div class="form-section">
+							<h3>PCB工艺</h3>
+							<div id="processList">
+								<!-- 动态生成的工艺项 -->
+							</div>
+							<button class="btn btn-secondary" style="width: 100%; margin-top: 10px" onclick="showAddProcessModal()">
+								+ 添加自定义工艺
+							</button>
+						</div>
+					</div>
+
+					<!-- 右侧面板 - 计价规则 -->
+					<div class="right-panel">
+						<div class="form-section">
+							<h3>计价方式</h3>
+							<div class="tabs">
+								<button class="tab active" onclick="switchTab('area')">按面积计价</button>
+								<button class="tab" onclick="switchTab('fixed')">一次性付费</button>
+								<button class="tab" onclick="switchTab('free')">免费</button>
+							</div>
+
+							<div id="area-tab" class="tab-content active">
+								<div class="form-group">
+									<label>基础价格 (元/平方厘米)</label>
+									<input type="number" id="base-price-area" class="form-control" value="0.5" step="0.01" />
+								</div>
+								<div class="form-group">
+									<label>附加价格 (元)</label>
+									<input type="number" id="extra-price-area" class="form-control" value="10" step="0.01" />
+								</div>
+								<p style="color: #5a6c7d; font-size: 14px; margin-top: 10px">计算公式：(基础价格 × 面积) + 附加价格</p>
+							</div>
+
+							<div id="fixed-tab" class="tab-content">
+								<div class="form-group">
+									<label>基础价格 (元)</label>
+									<input type="number" id="base-price-fixed" class="form-control" value="100" step="0.01" />
+								</div>
+								<div class="form-group">
+									<label>面积系数</label>
+									<input type="number" id="area-factor" class="form-control" value="0.1" step="0.01" />
+								</div>
+								<p style="color: #5a6c7d; font-size: 14px; margin-top: 10px">计算公式：基础价格 + (面积系数 × 面积)</p>
+							</div>
+
+							<div id="free-tab" class="tab-content">
+								<p style="color: #5a6c7d; font-size: 14px">此规则下所有订单免费</p>
+							</div>
+						</div>
+
+						<div class="form-section">
+							<h3>条件规则</h3>
+							<div id="conditionsList">
+								<!-- 动态生成的条件规则 -->
+							</div>
+							<button class="btn btn-secondary" style="width: 100%; margin-top: 10px" onclick="addCondition()">+ 添加条件规则</button>
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
+
+		<!-- 固定在底部的价格显示 -->
+		<div class="price-display-fixed">
+			<div class="price-label">预估价格</div>
+			<div class="price-value" id="finalPrice">¥0.00</div>
+		</div>
+
+		<!-- 新建规则模态框 -->
+		<div id="newRuleModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3>新建计价规则</h3>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label>规则名称</label>
+						<input type="text" id="newRuleName" class="form-control" placeholder="输入规则名称" />
+					</div>
+					<div class="form-group">
+						<label>计价方式</label>
+						<select id="newRuleType" class="form-control">
+							<option value="area">按面积计价</option>
+							<option value="fixed">一次性付费</option>
+							<option value="free">免费</option>
+						</select>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" onclick="closeModal('newRuleModal')">取消</button>
+					<button class="btn btn-primary" onclick="createNewRule()">创建</button>
+				</div>
 			</div>
 		</div>
 
-		<!-- 配置对话框 -->
-		<dialog id="configDialog">
-			<div class="dialog-header">
-				<h3>高级配置</h3>
-				<button class="close-btn" id="closeDialogBtn">&times;</button>
-			</div>
-			<div class="dialog-body">
-				<!-- 动态计价条件 -->
-				<h3>动态计价条件</h3>
-				<div class="form-group">
-					<label for="conditionName">条件名称:</label>
-					<input type="text" id="conditionName" placeholder="例如: FR-4板材" />
+		<!-- 添加工艺模态框 -->
+		<div id="addProcessModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3>添加自定义工艺</h3>
 				</div>
-				<div class="form-group">
-					<label for="conditionType">计价方式:</label>
-					<select id="conditionType">
-						<option value="area">面积类型 (增加单价)</option>
-						<option value="fixed">一次性类型 (固定费用)</option>
-					</select>
-				</div>
-				<div class="form-group">
-					<label for="conditionAmount">金额:</label>
-					<input type="number" id="conditionAmount" step="0.01" placeholder="单价(元/mm²) 或 固定费用(元)" />
-				</div>
-				<button id="addConditionBtn" class="btn-success">添加计价条件</button>
-				<div id="conditionsList"></div>
-
-				<!-- 计价规则管理 -->
-				<div class="rule-management">
-					<h3>计价规则管理</h3>
+				<div class="modal-body">
 					<div class="form-group">
-						<label for="ruleName">当前规则名称:</label>
-						<input type="text" id="ruleName" placeholder="例如: 标准双面板打样" />
+						<label>工艺名称</label>
+						<input type="text" id="processName" class="form-control" placeholder="输入工艺名称" />
 					</div>
 					<div class="form-group">
-						<label></label>
-						<!-- 修改：保存按钮 -->
-						<button id="saveRuleBtn" class="btn-secondary">保存当前规则</button>
+						<label>输入类型</label>
+						<select id="processType" class="form-control" onchange="toggleProcessInput()">
+							<option value="select">下拉选择</option>
+							<option value="input">数值输入</option>
+							<option value="color">颜色选择</option>
+						</select>
 					</div>
-
-					<!-- 新增：规则加载与管理区域 -->
-					<div class="form-group">
-						<label>已保存的规则:</label>
-						<div id="savedRulesContainer">
-							<select id="savedRulesSelect">
-								<option value="">-- 请选择要加载的规则 --</option>
-							</select>
-							<button id="loadRuleBtn" class="btn-primary">加载</button>
-							<button id="deleteRuleBtn" class="btn-danger">删除</button>
-						</div>
+					<div class="form-group" id="processOptionsGroup">
+						<label>选项值（每行一个）</label>
+						<textarea id="processOptions" class="form-control" rows="4" placeholder="选项1&#10;选项2&#10;选项3"></textarea>
 					</div>
-					<div class="rule-management-buttons">
-						<button id="refreshRulesBtn" class="btn-secondary">刷新列表</button>
-						<button id="clearAllRulesBtn" class="btn-warning">清空所有规则</button>
-					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" onclick="closeModal('addProcessModal')">取消</button>
+					<button class="btn btn-primary" onclick="addCustomProcess()">添加</button>
 				</div>
 			</div>
-		</dialog>
+		</div>
 
-		<script>
-			document.addEventListener('DOMContentLoaded', function () {
-				// --- DOM 元素引用 ---
-				const getDimensionsBtn = document.getElementById('getDimensionsBtn');
-				const widthInput = document.getElementById('width');
-				const heightInput = document.getElementById('height');
-				const basePriceInput = document.getElementById('basePrice');
-				const calculateBtn = document.getElementById('calculateBtn');
-				const finalPriceDiv = document.getElementById('finalPrice');
-				const statusMessage = document.getElementById('statusMessage');
+		<style>
+			/* 原有样式保持不变 */
 
-				// 对话框相关
-				const configDialog = document.getElementById('configDialog');
-				const openConfigBtn = document.getElementById('openConfigBtn');
-				const closeDialogBtn = document.getElementById('closeDialogBtn');
+			/* 新增的固定价格显示样式 */
+			.price-display-fixed {
+				position: fixed;
+				bottom: 0;
+				right: 0;
+				width: 300px;
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				color: white;
+				padding: 20px;
+				box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+				z-index: 1000;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				border-top-left-radius: 12px;
+				animation: slideUp 0.3s ease-out;
+			}
 
-				// 对话框内元素
-				const addConditionBtn = document.getElementById('addConditionBtn');
-				const conditionsListDiv = document.getElementById('conditionsList');
-				const ruleNameInput = document.getElementById('ruleName');
+			.price-display-fixed .price-label {
+				font-size: 16px;
+				font-weight: 500;
+				opacity: 0.9;
+			}
 
-				// --- 新增/修改的DOM元素 ---
-				const saveRuleBtn = document.getElementById('saveRuleBtn'); // 原 exportRuleBtn
-				const savedRulesSelect = document.getElementById('savedRulesSelect');
-				const loadRuleBtn = document.getElementById('loadRuleBtn');
-				const deleteRuleBtn = document.getElementById('deleteRuleBtn');
-				const refreshRulesBtn = document.getElementById('refreshRulesBtn');
-				const clearAllRulesBtn = document.getElementById('clearAllRulesBtn');
+			.price-display-fixed .price-value {
+				font-size: 24px;
+				font-weight: bold;
+			}
 
-				// --- 数据存储 ---
-				let priceConditions = []; // 存储动态计价条件的数组
+			/* 为了避免内容被固定价格遮挡，给主内容添加底部内边距 */
+			.main-content {
+				padding-bottom: 80px;
+			}
 
-				// --- 事件监听器 ---
-
-				// 1. 获取尺寸按钮的点击事件 (无变化)
-				getDimensionsBtn.addEventListener('click', function () {
-					statusMessage.textContent = '正在尝试从EDA获取尺寸...';
-					statusMessage.style.color = '#007bff';
-
-					// 调用EDA的图元类获取板框的长和宽
-					const primitivesPromise = eda.pcb_SelectControl.getSelectedPrimitives();
-
-					primitivesPromise
-						.then((selectedArray) => {
-							if (selectedArray && selectedArray.length > 0) {
-								const firstPrimitive = selectedArray[0];
-								const width = firstPrimitive.width * 0.254;
-								const height = firstPrimitive.height * 0.254;
-
-								widthInput.value = width.toFixed(2);
-								heightInput.value = height.toFixed(2);
-
-								statusMessage.textContent = `成功获取尺寸: ${width.toFixed(2)} mm x ${height.toFixed(2)} mm`;
-								statusMessage.style.color = 'green';
-							} else {
-								statusMessage.textContent = '没有选中的图元。请在EDA中选中PCB板框后重试。';
-								statusMessage.style.color = 'orange';
-							}
-						})
-						.catch((error) => {
-							statusMessage.textContent = '获取图元时发生错误，请查看控制台。';
-							statusMessage.style.color = 'red';
-							console.error('获取图元时发生错误:', error);
-						});
-				});
-
-				// 2. 计算最终价格按钮的点击事件 (无变化)
-				calculateBtn.addEventListener('click', function () {
-					const width = parseFloat(widthInput.value);
-					const height = parseFloat(heightInput.value);
-					const basePrice = parseFloat(basePriceInput.value);
-
-					if (isNaN(width) || isNaN(height) || isNaN(basePrice)) {
-						finalPriceDiv.innerHTML = '<span style="color: red;">请填写有效的宽度、高度和基础单价！</span>';
-						return;
-					}
-
-					const area = width * height;
-					let currentUnitPrice = basePrice;
-					let fixedCosts = 0;
-
-					priceConditions.forEach((condition) => {
-						if (condition.type === 'area') {
-							currentUnitPrice += condition.amount;
-						} else if (condition.type === 'fixed') {
-							fixedCosts += condition.amount;
-						}
-					});
-
-					const areaCost = area * currentUnitPrice;
-					const totalCost = areaCost + fixedCosts;
-
-					finalPriceDiv.innerHTML = `
-						<div>PCB 面积: <strong>${area.toFixed(2)} mm²</strong></div>
-						<div>最终单价: <strong>${currentUnitPrice.toFixed(3)} 元/mm²</strong></div>
-						<div>面积费用: <strong>${areaCost.toFixed(2)} 元</strong></div>
-						<div>固定费用: <strong>${fixedCosts.toFixed(2)} 元</strong></div>
-						<hr style="margin: 10px 0; border: none; border-top: 1px solid #ccc;">
-						<div>最终总价: <span style="color: #dc3545; font-size: 1.2em; font-weight: bold;">${totalCost.toFixed(2)} 元</span></div>
-					`;
-				});
-
-				// --- 对话框控制 ---
-				openConfigBtn.addEventListener('click', () => {
-					configDialog.showModal();
-					refreshRulesList(); // 每次打开对话框时刷新规则列表
-				});
-				closeDialogBtn.addEventListener('click', () => configDialog.close());
-
-				// 3. 添加计价条件按钮的点击事件 (无变化)
-				addConditionBtn.addEventListener('click', function () {
-					const name = document.getElementById('conditionName').value;
-					const type = document.getElementById('conditionType').value;
-					const amount = parseFloat(document.getElementById('conditionAmount').value);
-
-					if (!name || isNaN(amount)) {
-						alert('请填写完整的条件名称和金额！');
-						return;
-					}
-
-					const newCondition = { name, type, amount };
-					priceConditions.push(newCondition);
-
-					// 清空输入框
-					document.getElementById('conditionName').value = '';
-					document.getElementById('conditionAmount').value = '';
-
-					renderConditions();
-				});
-
-				// --- 修改的核心业务逻辑 ---
-
-				// 4. 保存规则按钮的点击事件 (原导出)
-				// 修改: 移除 async/await，改为同步调用
-				saveRuleBtn.addEventListener('click', function () {
-					const ruleName = ruleNameInput.value.trim();
-					if (!ruleName) {
-						alert('请先输入规则名称！');
-						return;
-					}
-					const basePrice = parseFloat(basePriceInput.value);
-					if (isNaN(basePrice)) {
-						statusMessage.textContent = '保存失败：请先设置有效的基础单价。';
-						statusMessage.style.color = 'red';
-						return;
-					}
-
-					const ruleData = {
-						ruleName: ruleName,
-						basePrice: basePrice,
-						conditions: priceConditions,
-						exportDate: new Date().toLocaleString('zh-CN'),
-					};
-
-					try {
-						// 修改: 直接调用函数，不使用 await
-						const success = eda.sys_Storage.setExtensionUserConfig(ruleName, ruleData);
-						if (success) {
-							statusMessage.textContent = `规则 "${ruleName}" 已成功保存！`;
-							statusMessage.style.color = 'green';
-							refreshRulesList(); // 保存后刷新列表
-						} else {
-							throw new Error('保存操作返回失败');
-						}
-					} catch (error) {
-						statusMessage.textContent = `保存失败: ${error.message}`;
-						statusMessage.style.color = 'red';
-						console.error('保存规则失败:', error);
-					}
-				});
-
-				// 5. 加载规则按钮的点击事件
-				// 修改: 移除 async/await 和 .then()，改为同步调用
-				loadRuleBtn.addEventListener('click', function () {
-					const selectedRuleName = savedRulesSelect.value;
-					if (!selectedRuleName) {
-						alert('请先从下拉框中选择一个规则！');
-						return;
-					}
-
-					try {
-						// 修改: 直接调用函数，不使用 .then()
-						const ruleData = eda.sys_Storage.getExtensionUserConfig(selectedRuleName);
-						if (ruleData) {
-							// 将数据应用到界面
-							ruleNameInput.value = ruleData.ruleName || '';
-							basePriceInput.value = ruleData.basePrice;
-							priceConditions = ruleData.conditions || [];
-							renderConditions();
-
-							statusMessage.textContent = `成功加载规则 "${selectedRuleName}"！`;
-							statusMessage.style.color = 'green';
-						} else {
-							statusMessage.textContent = `加载失败：找不到规则 "${selectedRuleName}"`;
-							statusMessage.style.color = 'red';
-						}
-					} catch (error) {
-						statusMessage.textContent = `加载失败: ${error.message}`;
-						statusMessage.style.color = 'red';
-						console.error('加载规则失败:', error);
-					}
-				});
-
-				// 6. 删除规则按钮的点击事件
-				// 修改: 移除 async/await，改为同步调用
-				deleteRuleBtn.addEventListener('click', function () {
-					const selectedRuleName = savedRulesSelect.value;
-					if (!selectedRuleName) {
-						alert('请先从下拉框中选择一个要删除的规则！');
-						return;
-					}
-
-					if (!confirm(`确定要删除规则 "${selectedRuleName}" 吗？此操作不可恢复。`)) {
-						return;
-					}
-
-					try {
-						// 修改: 直接调用函数，不使用 await
-						const success = eda.sys_Storage.deleteExtensionUserConfig(selectedRuleName);
-						if (success) {
-							statusMessage.textContent = `规则 "${selectedRuleName}" 已删除。`;
-							statusMessage.style.color = 'orange';
-							refreshRulesList(); // 删除后刷新列表
-						} else {
-							throw new Error('删除操作返回失败');
-						}
-					} catch (error) {
-						statusMessage.textContent = `删除失败: ${error.message}`;
-						statusMessage.style.color = 'red';
-						console.error('删除规则失败:', error);
-					}
-				});
-
-				// 7. 清空所有规则按钮的点击事件
-				// 修改: 移除 async/await，改为同步调用
-				clearAllRulesBtn.addEventListener('click', function () {
-					if (!confirm('确定要清空所有已保存的计价规则吗？此操作不可恢复！')) {
-						return;
-					}
-
-					try {
-						// 修改: 直接调用函数，不使用 await
-						const success = eda.sys_Storage.clearExtensionAllUserConfigs();
-						if (success) {
-							statusMessage.textContent = '所有计价规则已清空。';
-							statusMessage.style.color = 'orange';
-							refreshRulesList(); // 清空后刷新列表
-						} else {
-							throw new Error('清空操作返回失败');
-						}
-					} catch (error) {
-						statusMessage.textContent = `清空失败: ${error.message}`;
-						statusMessage.style.color = 'red';
-						console.error('清空规则失败:', error);
-					}
-				});
-
-				// 8. 刷新列表按钮的点击事件
-				refreshRulesBtn.addEventListener('click', refreshRulesList);
-
-				// --- 辅助函数 ---
-
-				// 渲染计价条件列表 (在对话框内)
-				function renderConditions() {
-					conditionsListDiv.innerHTML = '';
-					if (priceConditions.length === 0) {
-						conditionsListDiv.innerHTML = '<p>暂无计价条件。</p>';
-						return;
-					}
-
-					priceConditions.forEach((condition, index) => {
-						const conditionItem = document.createElement('div');
-						conditionItem.className = 'condition-item';
-
-						const info = document.createElement('div');
-						info.className = 'condition-info';
-						const typeText = condition.type === 'area' ? ' (面积类型)' : ' (一次性类型)';
-						info.innerHTML = `<strong>${condition.name}</strong>: ${condition.amount} 元${condition.type === 'area' ? '/mm²' : ''}${typeText}`;
-
-						const deleteButton = document.createElement('button');
-						deleteButton.className = 'btn-danger';
-						deleteButton.textContent = '删除';
-						deleteButton.addEventListener('click', function () {
-							priceConditions.splice(index, 1);
-							renderConditions();
-						});
-
-						conditionItem.appendChild(info);
-						conditionItem.appendChild(deleteButton);
-						conditionsListDiv.appendChild(conditionItem);
-					});
+			/* 动画效果 */
+			@keyframes slideUp {
+				from {
+					transform: translateY(100%);
+					opacity: 0;
 				}
-
-				// --- 修改的核心辅助函数 ---
-
-				/**
-				 * 从存储中获取所有规则并刷新下拉框
-				 * 修改: 移除 async/await，改为同步调用
-				 */
-				function refreshRulesList() {
-					try {
-						// 修改: 直接调用函数，不使用 await
-						const allRules = eda.sys_Storage.getExtensionAllUserConfigs();
-						// 清空现有选项
-						savedRulesSelect.innerHTML = '<option value="">-- 请选择要加载的规则 --</option>';
-
-						// 按名称排序
-						const sortedRuleNames = Object.keys(allRules).sort();
-
-						if (sortedRuleNames.length === 0) {
-							savedRulesSelect.innerHTML = '<option value="">-- 暂无已保存的规则 --</option>';
-						} else {
-							sortedRuleNames.forEach((ruleName) => {
-								const option = document.createElement('option');
-								option.value = ruleName;
-								option.textContent = ruleName;
-								savedRulesSelect.appendChild(option);
-							});
-						}
-					} catch (error) {
-						console.error('刷新规则列表失败:', error);
-						statusMessage.textContent = '刷新规则列表失败，请查看控制台。';
-						statusMessage.style.color = 'red';
-					}
+				to {
+					transform: translateY(0);
+					opacity: 1;
 				}
+			}
 
-				// --- 初始化 ---
-				renderConditions();
-				// 页面加载时不需要立即刷新列表，在打开对话框时刷新即可
-			});
-		</script>
+			/* 响应式调整 */
+			@media (max-width: 768px) {
+				.price-display-fixed {
+					width: 100%;
+					border-top-left-radius: 0;
+				}
+			}
+		</style>
 	</body>
+
+	<script>
+		// 全局变量
+		// allRules 将作为唯一的数据源，存储所有规则
+		let allRules = {
+			'default': {
+				id: 'default',
+				name: '默认规则',
+				type: 'area',
+				basePrice: 0.5,
+				extraPrice: 10,
+				conditions: [],
+			},
+		};
+		// currentRuleId 只存储当前选中规则的ID
+		let currentRuleId = 'default';
+
+		let customProcesses = [];
+		let allProcesses = [];
+
+		// 初始化
+		document.addEventListener('DOMContentLoaded', function () {
+			initializeProcesses();
+			renderProcesses();
+			renderRulesList(); // 新增：统一渲染规则列表
+			selectRule('default'); // 初始化时选中默认规则
+			renderConditions();
+		});
+
+		// 初始化工艺列表
+		function initializeProcesses() {
+			allProcesses = [
+				{ id: 'put_together', name: '拼板款数', type: 'input', unit: '个' },
+				{ id: 'delivery', name: '出货方式', type: 'select', options: ['单片', '拼板'] },
+				{ id: 'copper_thick', name: '外层铜厚', type: 'input', unit: '盎司' },
+				{ id: 'soldermask_color', name: '阻焊颜色', type: 'color', default: '#2E8B57' },
+				{ id: 'content_color', name: '字符颜色', type: 'color', default: '#ffffff' },
+				{
+					id: 'solder_cover',
+					name: '阻焊覆盖',
+					type: 'select',
+					options: ['过孔盖油', '过孔开窗', '过孔塞油', '过孔塞树脂+过孔电镀盖帽', '过孔塞铜浆+过孔电镀盖帽'],
+				},
+				{ id: 'solder_cover_type', name: '焊盘喷锡', type: 'select', options: ['有铅喷锡', '无铅喷锡', '沉金'] },
+				{
+					id: 'min_hole_diameter',
+					name: '最小孔径/外径',
+					type: 'select',
+					options: ['0.3mm(外径0.4/0.45)', '0.25mm(外径0.35/0.4)', '0.2mm(外径0.3/0.35)', '0.15mm(外径0.25/0.3)'],
+				},
+				{ id: 'gold_finger_bevel', name: '金(锡)手指斜边', type: 'select', options: ['不需要', '需要'] },
+				{ id: 'line_test', name: '线路测试', type: 'select', options: ['AOI全测+飞针全测'] },
+			];
+		}
+
+		// 渲染工艺列表
+		function renderProcesses() {
+			const processList = document.getElementById('processList');
+			processList.innerHTML = '';
+
+			[...allProcesses, ...customProcesses].forEach((process) => {
+				const processItem = document.createElement('div');
+				processItem.className = 'process-item';
+				processItem.innerHTML = `
+            <div class="process-name">${process.name}</div>
+            <div class="process-control">
+                ${renderProcessControl(process)}
+            </div>
+            ${
+				process.custom
+					? `
+                <div class="process-actions">
+                    <button class="icon-btn" onclick="editProcess('${process.id}')">✏️</button>
+                    <button class="icon-btn" onclick="deleteProcess('${process.id}')">🗑️</button>
+                </div>
+            `
+					: ''
+			}
+        `;
+				processList.appendChild(processItem);
+			});
+		}
+
+		// 渲染工艺控件
+		function renderProcessControl(process) {
+			switch (process.type) {
+				case 'select':
+					return `<select id="process-${process.id}" class="form-control">
+                ${process.options.map((opt) => `<option value="${opt}">${opt}</option>`).join('')}
+            </select>`;
+				case 'input':
+					return `<div class="input-group">
+                <input type="number" id="process-${process.id}" class="form-control" placeholder="输入数值">
+                ${process.unit ? `<span class="unit">${process.unit}</span>` : ''}
+            </div>`;
+				case 'color':
+					return `<div class="color-picker-wrapper">
+                <input type="color" id="process-${process.id}" class="color-picker" value="${process.default || '#000000'}">
+                <span>${process.default || '#000000'}</span>
+            </div>`;
+				default:
+					return '';
+			}
+		}
+
+		// 添加条件规则
+		function addCondition() {
+			const condition = {
+				id: Date.now(),
+				process: '',
+				operator: '=',
+				value: '',
+				action: '+',
+				amount: 0,
+			};
+			// 通过 currentRuleId 获取当前规则
+			allRules[currentRuleId].conditions.push(condition);
+			renderConditions();
+		}
+
+		// 渲染条件规则
+		function renderConditions() {
+			const conditionsList = document.getElementById('conditionsList');
+			conditionsList.innerHTML = '';
+
+			const currentRule = allRules[currentRuleId];
+			if (!currentRule || currentRule.conditions.length === 0) {
+				conditionsList.innerHTML = '<p style="color: #5a6c7d; text-align: center;">暂无条件规则</p>';
+				return;
+			}
+
+			currentRule.conditions.forEach((condition) => {
+				const conditionDiv = document.createElement('div');
+				conditionDiv.className = 'condition-rule';
+				conditionDiv.innerHTML = `
+            <div class="condition-header">
+                <span class="condition-title">条件规则 #${condition.id}</span>
+                <button class="icon-btn" onclick="removeCondition(${condition.id})">❌</button>
+            </div>
+            <div class="condition-body">
+                <span>如果</span>
+                <select class="condition-select" onchange="updateCondition(${condition.id}, 'process', this.value)">
+                    <option value="">选择工艺</option>
+                    ${[...allProcesses, ...customProcesses]
+						.map((p) => `<option value="${p.id}" ${condition.process === p.id ? 'selected' : ''}>${p.name}</option>`)
+						.join('')}
+                </select>
+                <select class="condition-select" onchange="updateCondition(${condition.id}, 'operator', this.value)">
+                    <option value="=" ${condition.operator === '=' ? 'selected' : ''}>=</option>
+                    <option value=">" ${condition.operator === '>' ? 'selected' : ''}>></option>
+                    <option value="<" ${condition.operator === '<' ? 'selected' : ''}><</option>
+                    <option value=">=" ${condition.operator === '>=' ? 'selected' : ''}>>=</option>
+                    <option value="<=" ${condition.operator === '<=' ? 'selected' : ''}<=</option>
+                </select>
+                <input type="text" class="condition-input" placeholder="值" value="${condition.value}" 
+                       onchange="updateCondition(${condition.id}, 'value', this.value)">
+                <span>则价格</span>
+                <select class="condition-select" onchange="updateCondition(${condition.id}, 'action', this.value)">
+                    <option value="+" ${condition.action === '+' ? 'selected' : ''}>+</option>
+                    <option value="-" ${condition.action === '-' ? 'selected' : ''}>-</option>
+                    <option value="*" ${condition.action === '*' ? 'selected' : ''}>×</option>
+                    <option value="/" ${condition.action === '/' ? 'selected' : ''}>÷</option>
+                </select>
+                <input type="number" class="condition-input" placeholder="金额" value="${condition.amount}"
+                       onchange="updateCondition(${condition.id}, 'amount', this.value)">
+            </div>
+        `;
+				conditionsList.appendChild(conditionDiv);
+			});
+		}
+
+		// 更新条件
+		function updateCondition(id, field, value) {
+			const condition = allRules[currentRuleId].conditions.find((c) => c.id === id);
+			if (condition) {
+				condition[field] = field === 'amount' ? parseFloat(value) || 0 : value;
+			}
+		}
+
+		// 删除条件
+		function removeCondition(id) {
+			allRules[currentRuleId].conditions = allRules[currentRuleId].conditions.filter((c) => c.id !== id);
+			renderConditions();
+		}
+
+		// 切换标签页
+		function switchTab(tab) {
+			document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+			document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('active'));
+
+			event.target.classList.add('active');
+			document.getElementById(`${tab}-tab`).classList.add('active');
+
+			// 更新当前规则的类型
+			allRules[currentRuleId].type = tab;
+		}
+
+		// 计算价格
+		function calculatePrice() {
+			const length = parseFloat(document.getElementById('length-input').value) || 0;
+			const width = parseFloat(document.getElementById('width-input').value) || 0;
+			const area = length * width;
+
+			let price = 0;
+			const currentRule = allRules[currentRuleId];
+
+			switch (currentRule.type) {
+				case 'area':
+					const basePrice = parseFloat(document.getElementById('base-price-area').value) || 0;
+					const extraPrice = parseFloat(document.getElementById('extra-price-area').value) || 0;
+					price = basePrice * area + extraPrice;
+					break;
+				case 'fixed':
+					const fixedBase = parseFloat(document.getElementById('base-price-fixed').value) || 0;
+					const areaFactor = parseFloat(document.getElementById('area-factor').value) || 0;
+					price = fixedBase + areaFactor * area;
+					break;
+				case 'free':
+					price = 0;
+					break;
+			}
+
+			// 应用条件规则
+			currentRule.conditions.forEach((condition) => {
+				const processValue = getProcessValue(condition.process);
+				if (evaluateCondition(processValue, condition.operator, condition.value)) {
+					switch (condition.action) {
+						case '+':
+							price += condition.amount;
+							break;
+						case '-':
+							price -= condition.amount;
+							break;
+						case '*':
+							price *= condition.amount;
+							break;
+						case '/':
+							price /= condition.amount;
+							break;
+					}
+				}
+			});
+
+			document.getElementById('finalPrice').textContent = `¥${price.toFixed(2)}`;
+		}
+
+		// 获取工艺值
+		function getProcessValue(processId) {
+			const element = document.getElementById(`process-${processId}`);
+			return element ? element.value : '';
+		}
+
+		// 评估条件
+		function evaluateCondition(actual, operator, expected) {
+			if (actual === undefined || actual === null || expected === '') return false;
+
+			const a = parseFloat(actual) || actual;
+			const e = parseFloat(expected) || expected;
+
+			switch (operator) {
+				case '=':
+					return a == e;
+				case '>':
+					return a > e;
+				case '<':
+					return a < e;
+				case '>=':
+					return a >= e;
+				case '<=':
+					return a <= e;
+				default:
+					return false;
+			}
+		}
+
+		// 显示新建规则模态框
+		function showNewRuleModal() {
+			document.getElementById('newRuleModal').classList.add('show');
+		}
+
+		// 显示添加工艺模态框
+		function showAddProcessModal() {
+			document.getElementById('addProcessModal').classList.add('show');
+		}
+
+		// 关闭模态框
+		function closeModal(modalId) {
+			document.getElementById(modalId).classList.remove('show');
+		}
+
+		// 创建新规则
+		function createNewRule() {
+			const name = document.getElementById('newRuleName').value;
+			const type = document.getElementById('newRuleType').value;
+
+			if (!name) {
+				alert('请输入规则名称');
+				return;
+			}
+
+			const newRule = {
+				id: Date.now().toString(),
+				name: name,
+				type: type,
+				basePrice: 0.5,
+				extraPrice: 10,
+				conditions: [],
+			};
+
+			// 保存到allRules
+			allRules[newRule.id] = newRule;
+
+			// 重新渲染规则列表
+			renderRulesList();
+
+			// 立即切换到新规则
+			selectRule(newRule.id);
+
+			closeModal('newRuleModal');
+			document.getElementById('newRuleName').value = '';
+		}
+
+		// 渲染规则列表 (新增函数，用于统一管理侧边栏)
+		function renderRulesList() {
+			const rulesList = document.getElementById('rulesList');
+			rulesList.innerHTML = ''; // 清空列表
+
+			Object.values(allRules).forEach((rule) => {
+				const ruleItem = document.createElement('div');
+				ruleItem.className = 'rule-item';
+				ruleItem.dataset.ruleId = rule.id;
+				ruleItem.innerHTML = `
+            <div class="rule-name">${rule.name}</div>
+            <div class="rule-type">${rule.type === 'area' ? '按面积计价' : rule.type === 'fixed' ? '一次性付费' : '免费'}</div>
+        `;
+				ruleItem.onclick = () => selectRule(rule.id);
+				rulesList.appendChild(ruleItem);
+			});
+		}
+
+		// 选择规则 (已修复)
+		function selectRule(ruleId) {
+			// 检查规则是否存在
+			if (!allRules[ruleId]) {
+				console.error(`Rule with id ${ruleId} not found.`);
+				return;
+			}
+
+			// 更新当前规则ID
+			currentRuleId = ruleId;
+			const currentRule = allRules[currentRuleId];
+
+			// 更新UI选中状态
+			document.querySelectorAll('.rule-item').forEach((item) => item.classList.remove('active'));
+			const selectedItem = document.querySelector(`[data-rule-id="${ruleId}"]`);
+			if (selectedItem) {
+				selectedItem.classList.add('active');
+			}
+
+			// 更新标签页
+			document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+			document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('active'));
+
+			const activeTab = document.querySelector(`.tab[data-tab="${currentRule.type}"]`);
+			if (activeTab) {
+				activeTab.classList.add('active');
+				document.getElementById(`${currentRule.type}-tab`).classList.add('active');
+			}
+
+			// 重新渲染条件
+			renderConditions();
+		}
+
+		// 添加自定义工艺
+		function addCustomProcess() {
+			const name = document.getElementById('processName').value;
+			const type = document.getElementById('processType').value;
+			const options = document
+				.getElementById('processOptions')
+				.value.split('\n')
+				.filter((o) => o.trim());
+
+			if (!name) {
+				alert('请输入工艺名称');
+				return;
+			}
+
+			if (type === 'select' && options.length === 0) {
+				alert('请添加选项值');
+				return;
+			}
+
+			const process = {
+				id: 'custom_' + Date.now(),
+				name: name,
+				type: type,
+				options: options,
+				custom: true,
+			};
+
+			customProcesses.push(process);
+			renderProcesses();
+			renderConditions();
+
+			closeModal('addProcessModal');
+			document.getElementById('processName').value = '';
+			document.getElementById('processOptions').value = '';
+		}
+
+		// 删除自定义工艺
+		function deleteProcess(processId) {
+			if (confirm('确定要删除这个工艺吗？')) {
+				customProcesses = customProcesses.filter((p) => p.id !== processId);
+				renderProcesses();
+				renderConditions();
+			}
+		}
+
+		// 切换工艺输入类型
+		function toggleProcessInput() {
+			const type = document.getElementById('processType').value;
+			const optionsGroup = document.getElementById('processOptionsGroup');
+			optionsGroup.style.display = type === 'select' ? 'block' : 'none';
+		}
+
+		// 导出规则
+		function exportRules() {
+			const rules = {
+				currentRuleId: currentRuleId,
+				allRules: allRules,
+				customProcesses: customProcesses,
+				timestamp: new Date().toISOString(),
+			};
+
+			const blob = new Blob([JSON.stringify(rules, null, 2)], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `pcb-pricing-rules-${Date.now()}.json`;
+			a.click();
+			URL.revokeObjectURL(url);
+		}
+
+		// 导入规则
+		function importRules() {
+			const input = document.createElement('input');
+			input.type = 'file';
+			input.accept = '.json';
+			input.onchange = function (e) {
+				const file = e.target.files[0];
+				if (!file) return;
+
+				const reader = new FileReader();
+				reader.onload = function (event) {
+					try {
+						const data = JSON.parse(event.target.result);
+
+						// 导入所有规则
+						if (data.allRules) {
+							allRules = data.allRules;
+							renderRulesList(); // 重新渲染列表
+						}
+
+						// 导入自定义工艺
+						if (data.customProcesses) {
+							customProcesses = data.customProcesses;
+							renderProcesses();
+						}
+
+						// 选中导入时记录的当前规则
+						if (data.currentRuleId && allRules[data.currentRuleId]) {
+							selectRule(data.currentRuleId);
+						} else if (Object.keys(allRules).length > 0) {
+							// 如果没有记录或记录无效，则选中第一个规则
+							selectRule(Object.keys(allRules)[0]);
+						}
+
+						alert('规则导入成功');
+					} catch (error) {
+						console.error('导入错误:', error);
+						alert('导入失败：文件格式错误');
+					}
+				};
+				reader.readAsText(file);
+				// 清空input值，确保可以重复选择同一文件
+				input.value = '';
+			};
+			input.click();
+		}
+
+		// 保留原有的PCB识别函数
+		async function GetPcbInfomation() {
+			let PCB_Infomation = await eda.pcb_SelectControl.getSelectedPrimitives();
+			PCB_Infomation = PCB_Infomation[0];
+			let width = PCB_Infomation.width * 0.254;
+			let height = PCB_Infomation.height * 0.254;
+			const All_Layers = await eda.pcb_Layer.getAllLayers();
+
+			document.getElementById('width-input').value = Math.round((width / 10) * 100) / 100;
+			document.getElementById('length-input').value = Math.round((height / 10) * 100) / 100;
+			document.getElementById('layer-input').value = calcLayers(All_Layers);
+
+			// 自动计算价格
+			calculatePrice();
+		}
+
+		// 获取PCB层数
+		function calcLayers(layers) {
+			let count = 0;
+			const ids = [
+				1,
+				2,
+				...Array.from(
+					{
+						length: 32,
+					},
+					(_, i) => i + 15,
+				),
+			];
+			for (const layer of layers) {
+				const id = parseInt(layer.id);
+				if (ids.includes(id) && layer.layerStatus === 1) {
+					count++;
+				}
+			}
+			return count;
+		}
+
+		// 监听颜色选择器变化
+		document.addEventListener('change', function (e) {
+			if (e.target.type === 'color') {
+				const span = e.target.nextElementSibling;
+				if (span) {
+					span.textContent = e.target.value;
+				}
+			}
+		});
+	</script>
 </html>

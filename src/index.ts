@@ -1,5 +1,5 @@
 export function PcbPrice(): void {
-	eda.sys_IFrame.openIFrame('/iframe/index.html', 700, 500);
+	eda.sys_IFrame.openIFrame('/iframe/index.html', 1000, 600);
 }
 
 export function Debug(): void {
