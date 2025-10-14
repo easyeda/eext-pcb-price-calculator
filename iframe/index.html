@@ -1234,8 +1234,10 @@
 			input.click();
 		}
 
-		// 保留原有的PCB识别函数
+		// PCB识别函数
 		async function GetPcbInfomation() {
+			const ids = await eda.pcb_PrimitivePolyline.getAllPrimitiveId(null, 11);
+			eda.pcb_SelectControl.doSelectPrimitives(ids);
 			let PCB_Infomation = await eda.pcb_SelectControl.getSelectedPrimitives();
 			PCB_Infomation = PCB_Infomation[0];
 			let width = PCB_Infomation.width * 0.254;

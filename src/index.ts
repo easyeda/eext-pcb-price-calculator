@@ -3,7 +3,7 @@ export function PcbPrice(): void {
 }
 
 export function Debug(): void {
-	eda.sys_IFrame.openIFrame('iframe/DEBUG/index.html', 500, 500);
+	eda.sys_IFrame.openIFrame('iframe/DEBUG/index.html', 500, 300);
 }
 
 // console.log(eda.sys_Storage.setExtensionUserConfig("测试项目一",1234)); 写入一次数据

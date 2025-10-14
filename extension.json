@@ -1,5 +1,5 @@
 {
-	"name": "peext-pcb-price-calculator",
+	"name": "eext-pcb-price-calculator",
 	"uuid": "6077dc5ce8194783a51f4a18d95d11a5",
 	"displayName": "PCB价格计算工具",
 	"description": "支持离线计算PCB下单价格，可添加多个规则场景，自定义添加计算参数，已内置嘉立创常用价格规则",
@@ -14,7 +14,7 @@
 		"url": ""
 	},
 	"categories": "PCB",
-	"keywords": ["PCB","Price"],
+	"keywords": ["PCB", "Price"],
 	"images": {
 		"logo": "./images/logo.png"
 	},
