@@ -348,6 +348,7 @@
 					transform: translateY(-50px);
 					opacity: 0;
 				}
+
 				to {
 					transform: translateY(0);
 					opacity: 1;
@@ -729,6 +730,7 @@
 					transform: translateY(100%);
 					opacity: 0;
 				}
+
 				to {
 					transform: translateY(0);
 					opacity: 1;
@@ -776,26 +778,66 @@
 		// 初始化工艺列表
 		function initializeProcesses() {
 			allProcesses = [
-				{ id: 'put_together', name: '拼板款数', type: 'input', unit: '个' },
-				{ id: 'delivery', name: '出货方式', type: 'select', options: ['单片', '拼板'] },
-				{ id: 'copper_thick', name: '外层铜厚', type: 'input', unit: '盎司' },
-				{ id: 'soldermask_color', name: '阻焊颜色', type: 'color', default: '#2E8B57' },
-				{ id: 'content_color', name: '字符颜色', type: 'color', default: '#ffffff' },
+				{
+					id: 'put_together',
+					name: '拼板款数',
+					type: 'input',
+					unit: '个',
+				},
+				{
+					id: 'delivery',
+					name: '出货方式',
+					type: 'select',
+					options: ['单片', '拼板'],
+				},
+				{
+					id: 'copper_thick',
+					name: '外层铜厚',
+					type: 'input',
+					unit: '盎司',
+				},
+				{
+					id: 'soldermask_color',
+					name: '阻焊颜色',
+					type: 'color',
+					default: '#2E8B57',
+				},
+				{
+					id: 'content_color',
+					name: '字符颜色',
+					type: 'color',
+					default: '#ffffff',
+				},
 				{
 					id: 'solder_cover',
 					name: '阻焊覆盖',
 					type: 'select',
 					options: ['过孔盖油', '过孔开窗', '过孔塞油', '过孔塞树脂+过孔电镀盖帽', '过孔塞铜浆+过孔电镀盖帽'],
 				},
-				{ id: 'solder_cover_type', name: '焊盘喷锡', type: 'select', options: ['有铅喷锡', '无铅喷锡', '沉金'] },
+				{
+					id: 'solder_cover_type',
+					name: '焊盘喷锡',
+					type: 'select',
+					options: ['有铅喷锡', '无铅喷锡', '沉金'],
+				},
 				{
 					id: 'min_hole_diameter',
 					name: '最小孔径/外径',
 					type: 'select',
 					options: ['0.3mm(外径0.4/0.45)', '0.25mm(外径0.35/0.4)', '0.2mm(外径0.3/0.35)', '0.15mm(外径0.25/0.3)'],
 				},
-				{ id: 'gold_finger_bevel', name: '金(锡)手指斜边', type: 'select', options: ['不需要', '需要'] },
-				{ id: 'line_test', name: '线路测试', type: 'select', options: ['AOI全测+飞针全测'] },
+				{
+					id: 'gold_finger_bevel',
+					name: '金(锡)手指斜边',
+					type: 'select',
+					options: ['不需要', '需要'],
+				},
+				{
+					id: 'line_test',
+					name: '线路测试',
+					type: 'select',
+					options: ['AOI全测+飞针全测'],
+				},
 			];
 		}
 
@@ -1178,7 +1220,9 @@
 				timestamp: new Date().toISOString(),
 			};
 
-			const blob = new Blob([JSON.stringify(rules, null, 2)], { type: 'application/json' });
+			const blob = new Blob([JSON.stringify(rules, null, 2)], {
+				type: 'application/json',
+			});
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement('a');
 			a.href = url;
@@ -1236,20 +1280,24 @@
 
 		// PCB识别函数
 		async function GetPcbInfomation() {
-			const ids = await eda.pcb_PrimitivePolyline.getAllPrimitiveId(null, 11);
-			eda.pcb_SelectControl.doSelectPrimitives(ids);
-			let PCB_Infomation = await eda.pcb_SelectControl.getSelectedPrimitives();
-			PCB_Infomation = PCB_Infomation[0];
-			let width = PCB_Infomation.width * 0.254;
-			let height = PCB_Infomation.height * 0.254;
-			const All_Layers = await eda.pcb_Layer.getAllLayers();
+			try {
+				const ids = await eda.pcb_PrimitivePolyline.getAllPrimitiveId(null, 11);
+				eda.pcb_SelectControl.doSelectPrimitives(ids);
+				let PCB_Infomation = await eda.pcb_SelectControl.getSelectedPrimitives();
+				PCB_Infomation = PCB_Infomation[0];
+				let width = PCB_Infomation.width * 0.254;
+				let height = PCB_Infomation.height * 0.254;
+				const All_Layers = await eda.pcb_Layer.getAllLayers();
 
-			document.getElementById('width-input').value = Math.round((width / 10) * 100) / 100;
-			document.getElementById('length-input').value = Math.round((height / 10) * 100) / 100;
-			document.getElementById('layer-input').value = calcLayers(All_Layers);
-
-			// 自动计算价格
-			calculatePrice();
+				document.getElementById('width-input').value = Math.round((width / 10) * 100) / 100;
+				document.getElementById('length-input').value = Math.round((height / 10) * 100) / 100;
+				document.getElementById('layer-input').value = calcLayers(All_Layers);
+				eda.sys_Message.showToastMessage('识别成功', 'success', 2);
+				// 自动计算价格
+				calculatePrice();
+			} catch (error) {
+				eda.sys_Message.showToastMessage('未识别到板框或板框过多，请手动框选并重试', 'error', 2);
+			}
 		}
 
 		// 获取PCB层数
