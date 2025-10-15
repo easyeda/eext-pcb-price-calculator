@@ -1,0 +1,518 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+	background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+	min-height: 100vh;
+	color: #2c3e50;
+}
+
+.container {
+	display: flex;
+	height: 100vh;
+	background: white;
+}
+
+/* 侧边栏样式 */
+.sidebar {
+	width: 260px;
+	background: linear-gradient(180deg, #2c5aa0 0%, #1e3c72 100%);
+	color: white;
+	padding: 20px;
+	overflow-y: auto;
+	box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h3 {
+	margin-bottom: 15px;
+	font-size: 16px;
+	opacity: 0.9;
+}
+
+.rule-item {
+	background: rgba(255, 255, 255, 0.1);
+	padding: 12px;
+	margin-bottom: 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	border: 2px solid transparent;
+}
+
+.rule-item:hover {
+	background: rgba(255, 255, 255, 0.2);
+	transform: translateX(5px);
+}
+
+.rule-item.active {
+	background: rgba(255, 255, 255, 0.25);
+	border-color: #4fc3f7;
+}
+
+.rule-name {
+	font-weight: 500;
+	margin-bottom: 5px;
+}
+
+.rule-type {
+	font-size: 12px;
+	opacity: 0.8;
+}
+
+/* 主内容区域 */
+.main-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+/* 顶部工具栏 */
+.toolbar {
+	background: white;
+	padding: 15px 20px;
+	border-bottom: 1px solid #e0e6ed;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.toolbar-left {
+	display: flex;
+	gap: 10px;
+}
+
+.btn {
+	padding: 8px 16px;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 14px;
+	transition: all 0.3s ease;
+	font-weight: 500;
+}
+
+.btn-primary {
+	background: #2c5aa0;
+	color: white;
+}
+
+.btn-primary:hover {
+	background: #1e3c72;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px rgba(44, 90, 160, 0.3);
+}
+
+.btn-secondary {
+	background: #f0f4f8;
+	color: #2c5aa0;
+	border: 1px solid #2c5aa0;
+}
+
+.btn-secondary:hover {
+	background: #e8f0fe;
+}
+
+.btn-danger {
+	background: #ff5252;
+	color: white;
+}
+
+.btn-danger:hover {
+	background: #ff1744;
+}
+
+/* 内容区域 */
+.content-area {
+	flex: 1;
+	display: flex;
+	overflow: hidden;
+}
+
+.left-panel,
+.right-panel {
+	flex: 1;
+	padding: 20px;
+	overflow-y: auto;
+}
+
+.left-panel {
+	border-right: 1px solid #e0e6ed;
+	background: #fafbfc;
+}
+
+.right-panel {
+	background: white;
+}
+
+/* 表单样式 */
+.form-section {
+	background: white;
+	border-radius: 10px;
+	padding: 20px;
+	margin-bottom: 20px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.form-section h3 {
+	color: #2c5aa0;
+	margin-bottom: 15px;
+	font-size: 18px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.form-section h3::before {
+	content: '';
+	width: 4px;
+	height: 20px;
+	background: #2c5aa0;
+	border-radius: 2px;
+}
+
+.form-group {
+	margin-bottom: 15px;
+}
+
+.form-group label {
+	display: block;
+	margin-bottom: 5px;
+	color: #5a6c7d;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.form-control {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid #d0d7de;
+	border-radius: 6px;
+	font-size: 14px;
+	transition: all 0.3s ease;
+}
+
+.form-control:focus {
+	outline: none;
+	border-color: #2c5aa0;
+	box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+}
+
+.input-group {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
+.input-group .form-control {
+	flex: 1;
+}
+
+.input-group .unit {
+	color: #5a6c7d;
+	font-size: 14px;
+	min-width: 40px;
+}
+
+/* 工艺项目样式 */
+.process-item {
+	display: flex;
+	align-items: center;
+	padding: 10px;
+	background: #f8f9fa;
+	border-radius: 6px;
+	margin-bottom: 10px;
+	transition: all 0.3s ease;
+}
+
+.process-item:hover {
+	background: #e8f0fe;
+}
+
+.process-name {
+	flex: 1;
+	font-weight: 500;
+	color: #2c3e50;
+}
+
+.process-control {
+	flex: 2;
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
+.process-actions {
+	display: flex;
+	gap: 5px;
+}
+
+.icon-btn {
+	width: 30px;
+	height: 30px;
+	border: none;
+	background: transparent;
+	color: #5a6c7d;
+	cursor: pointer;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+}
+
+.icon-btn:hover {
+	background: #e8f0fe;
+	color: #2c5aa0;
+}
+
+/* 条件规则样式 */
+.condition-rule {
+	background: #f8f9fa;
+	border: 1px solid #e0e6ed;
+	border-radius: 8px;
+	padding: 15px;
+	margin-bottom: 15px;
+	position: relative;
+}
+
+.condition-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.condition-title {
+	font-weight: 500;
+	color: #2c5aa0;
+}
+
+.condition-body {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.condition-select,
+.condition-input {
+	padding: 6px 10px;
+	border: 1px solid #d0d7de;
+	border-radius: 4px;
+	font-size: 14px;
+}
+
+/* 模态框样式 */
+.modal {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 1000;
+	align-items: center;
+	justify-content: center;
+}
+
+.modal.show {
+	display: flex;
+}
+
+.modal-content {
+	background: white;
+	border-radius: 12px;
+	padding: 30px;
+	max-width: 500px;
+	width: 90%;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+	animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateY(-50px);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+.modal-header {
+	margin-bottom: 20px;
+}
+
+.modal-header h3 {
+	color: #2c5aa0;
+	font-size: 20px;
+}
+
+.modal-body {
+	margin-bottom: 20px;
+}
+
+.modal-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+}
+
+/* 标签页样式 */
+.tabs {
+	display: flex;
+	border-bottom: 2px solid #e0e6ed;
+	margin-bottom: 20px;
+}
+
+.tab {
+	padding: 10px 20px;
+	background: transparent;
+	border: none;
+	color: #5a6c7d;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	position: relative;
+	transition: all 0.3s ease;
+}
+
+.tab:hover {
+	color: #2c5aa0;
+}
+
+.tab.active {
+	color: #2c5aa0;
+}
+
+.tab.active::after {
+	content: '';
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: #2c5aa0;
+}
+
+.tab-content {
+	display: none;
+}
+
+.tab-content.active {
+	display: block;
+}
+
+/* 颜色选择器样式 */
+.color-picker-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.color-picker {
+	width: 50px;
+	height: 35px;
+	border: 2px solid #d0d7de;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.color-picker:hover {
+	border-color: #2c5aa0;
+}
+
+/* 价格显示 */
+.price-display {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	padding: 20px;
+	border-radius: 10px;
+	text-align: center;
+	margin-top: 20px;
+}
+
+.price-label {
+	font-size: 14px;
+	opacity: 0.9;
+	margin-bottom: 5px;
+}
+
+.price-value {
+	font-size: 32px;
+	font-weight: bold;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+	.sidebar {
+		width: 200px;
+	}
+
+	.content-area {
+		flex-direction: column;
+	}
+
+	.left-panel,
+	.right-panel {
+		border-right: none;
+		border-bottom: 1px solid #e0e6ed;
+	}
+}
+
+/* 新增的固定价格显示样式 */
+.price-display-fixed {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	width: 300px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	padding: 20px;
+	box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+	z-index: 1000;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-top-left-radius: 12px;
+	animation: slideUp 0.3s ease-out;
+}
+
+.price-display-fixed .price-label {
+	font-size: 16px;
+	font-weight: 500;
+	opacity: 0.9;
+}
+
+.price-display-fixed .price-value {
+	font-size: 24px;
+	font-weight: bold;
+}
+
+/* 为了避免内容被固定价格遮挡，给主内容添加底部内边距 */
+.main-content {
+	padding-bottom: 80px;
+}
+
+/* 动画效果 */
+@keyframes slideUp {
+	from {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
