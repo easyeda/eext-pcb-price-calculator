@@ -215,6 +215,38 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- 编辑工艺模态框 -->
+		<div id="editProcessModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3>编辑自定义工艺</h3>
+				</div>
+				<div class="modal-body">
+					<input type="hidden" id="editProcessId" />
+					<div class="form-group">
+						<label>工艺名称</label>
+						<input type="text" id="editProcessName" class="form-control" placeholder="输入工艺名称" />
+					</div>
+					<div class="form-group">
+						<label>输入类型</label>
+						<select id="editProcessType" class="form-control" onchange="toggleEditProcessInput()">
+							<option value="select">下拉选择</option>
+							<option value="input">数值输入</option>
+							<option value="color">颜色选择</option>
+						</select>
+					</div>
+					<div class="form-group" id="editProcessOptionsGroup" style="display: none">
+						<label>选项值（每行一个）</label>
+						<textarea id="editProcessOptions" class="form-control" rows="4" placeholder="选项1&#10;选项2&#10;选项3"></textarea>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" onclick="closeModal('editProcessModal')">取消</button>
+					<button class="btn btn-primary" onclick="saveEditProcess()">保存</button>
+				</div>
+			</div>
+		</div>
 	</body>
 
 	<script>
@@ -324,21 +356,21 @@
 				const processItem = document.createElement('div');
 				processItem.className = 'process-item';
 				processItem.innerHTML = `
-            <div class="process-name">${process.name}</div>
-            <div class="process-control">
-                ${renderProcessControl(process)}
-            </div>
-            ${
+		          <div class="process-name">${process.name}</div>
+		          <div class="process-control">
+		              ${renderProcessControl(process)}
+		          </div>
+		          ${
 				process.custom
 					? `
-                <div class="process-actions">
-                    <button class="icon-btn" onclick="editProcess('${process.id}')">✏️</button>
-                    <button class="icon-btn" onclick="deleteProcess('${process.id}')">🗑️</button>
-                </div>
-            `
+		              <div class="process-actions">
+		                  <button class="icon-btn" onclick="editProcess('${process.id}')">✏️</button>
+		                  <button class="icon-btn" onclick="deleteProcess('${process.id}')">🗑️</button>
+		              </div>
+		          `
 					: ''
 			}
-        `;
+		      `;
 				processList.appendChild(processItem);
 			});
 		}
@@ -348,18 +380,18 @@
 			switch (process.type) {
 				case 'select':
 					return `<select id="process-${process.id}" class="form-control">
-                ${process.options.map((opt) => `<option value="${opt}">${opt}</option>`).join('')}
-            </select>`;
+		              ${process.options.map((opt) => `<option value="${opt}">${opt}</option>`).join('')}
+		          </select>`;
 				case 'input':
 					return `<div class="input-group">
-                <input type="number" id="process-${process.id}" class="form-control" placeholder="输入数值">
-                ${process.unit ? `<span class="unit">${process.unit}</span>` : ''}
-            </div>`;
+		              <input type="number" id="process-${process.id}" class="form-control" placeholder="输入数值">
+		              ${process.unit ? `<span class="unit">${process.unit}</span>` : ''}
+		          </div>`;
 				case 'color':
 					return `<div class="color-picker-wrapper">
-                <input type="color" id="process-${process.id}" class="color-picker" value="${process.default || '#000000'}">
-                <span>${process.default || '#000000'}</span>
-            </div>`;
+		              <input type="color" id="process-${process.id}" class="color-picker" value="${process.default || '#000000'}">
+		              <span>${process.default || '#000000'}</span>
+		          </div>`;
 				default:
 					return '';
 			}
@@ -395,38 +427,38 @@
 				const conditionDiv = document.createElement('div');
 				conditionDiv.className = 'condition-rule';
 				conditionDiv.innerHTML = `
-            <div class="condition-header">
-                <span class="condition-title">条件规则 #${condition.id}</span>
-                <button class="icon-btn" onclick="removeCondition(${condition.id})">❌</button>
-            </div>
-            <div class="condition-body">
-                <span>如果</span>
-                <select class="condition-select" onchange="updateCondition(${condition.id}, 'process', this.value)">
-                    <option value="">选择工艺</option>
-                    ${[...allProcesses, ...(currentRule.customProcesses || [])]
+		          <div class="condition-header">
+		              <span class="condition-title">条件规则 #${condition.id}</span>
+		              <button class="icon-btn" onclick="removeCondition(${condition.id})">❌</button>
+		          </div>
+		          <div class="condition-body">
+		              <span>如果</span>
+		              <select class="condition-select" onchange="updateCondition(${condition.id}, 'process', this.value)">
+		                  <option value="">选择工艺</option>
+		                  ${[...allProcesses, ...(currentRule.customProcesses || [])]
 						.map((p) => `<option value="${p.id}" ${condition.process === p.id ? 'selected' : ''}>${p.name}</option>`)
 						.join('')}
-                </select>
-                <select class="condition-select" onchange="updateCondition(${condition.id}, 'operator', this.value)">
-                    <option value="=" ${condition.operator === '=' ? 'selected' : ''}>=</option>
-                    <option value=">" ${condition.operator === '>' ? 'selected' : ''}>></option>
-                    <option value="<" ${condition.operator === '<' ? 'selected' : ''}><</option>
-                    <option value=">=" ${condition.operator === '>=' ? 'selected' : ''}>>=</option>
-                    <option value="<=" ${condition.operator === '<=' ? 'selected' : ''}<=</option>
-                </select>
-                <input type="text" class="condition-input" placeholder="值" value="${condition.value}" 
-                       onchange="updateCondition(${condition.id}, 'value', this.value)">
-                <span>则价格</span>
-                <select class="condition-select" onchange="updateCondition(${condition.id}, 'action', this.value)">
-                    <option value="+" ${condition.action === '+' ? 'selected' : ''}>+</option>
-                    <option value="-" ${condition.action === '-' ? 'selected' : ''}>-</option>
-                    <option value="*" ${condition.action === '*' ? 'selected' : ''}>×</option>
-                    <option value="/" ${condition.action === '/' ? 'selected' : ''}>÷</option>
-                </select>
-                <input type="number" class="condition-input" placeholder="金额" value="${condition.amount}"
-                       onchange="updateCondition(${condition.id}, 'amount', this.value)">
-            </div>
-        `;
+		              </select>
+		              <select class="condition-select" onchange="updateCondition(${condition.id}, 'operator', this.value)">
+		                  <option value="=" ${condition.operator === '=' ? 'selected' : ''}>=</option>
+		                  <option value=">" ${condition.operator === '>' ? 'selected' : ''}>></option>
+		                  <option value="<" ${condition.operator === '<' ? 'selected' : ''}><</option>
+		                  <option value=">=" ${condition.operator === '>=' ? 'selected' : ''}>>=</option>
+		                  <option value="<=" ${condition.operator === '<=' ? 'selected' : ''}<=</option>
+		              </select>
+		              <input type="text" class="condition-input" placeholder="值" value="${condition.value}"
+		                     onchange="updateCondition(${condition.id}, 'value', this.value)">
+		              <span>则价格</span>
+		              <select class="condition-select" onchange="updateCondition(${condition.id}, 'action', this.value)">
+		                  <option value="+" ${condition.action === '+' ? 'selected' : ''}>+</option>
+		                  <option value="-" ${condition.action === '-' ? 'selected' : ''}>-</option>
+		                  <option value="*" ${condition.action === '*' ? 'selected' : ''}>×</option>
+		                  <option value="/" ${condition.action === '/' ? 'selected' : ''}>÷</option>
+		              </select>
+		              <input type="number" class="condition-input" placeholder="金额" value="${condition.amount}"
+		                     onchange="updateCondition(${condition.id}, 'amount', this.value)">
+		          </div>
+		      `;
 				conditionsList.appendChild(conditionDiv);
 			});
 		}
@@ -455,6 +487,12 @@
 
 			// 更新当前规则的类型
 			allRules[currentRuleId].type = tab;
+		}
+
+		function toggleEditProcessInput() {
+			const type = document.getElementById('editProcessType').value;
+			const optionsGroup = document.getElementById('editProcessOptionsGroup');
+			optionsGroup.style.display = type === 'select' ? 'block' : 'none';
 		}
 
 		// 计算价格
@@ -593,9 +631,9 @@
 				ruleItem.className = 'rule-item';
 				ruleItem.dataset.ruleId = rule.id;
 				ruleItem.innerHTML = `
-            <div class="rule-name">${rule.name}</div>
-            <div class="rule-type">${rule.type === 'area' ? '按面积计价' : rule.type === 'fixed' ? '一次性付费' : '免费'}</div>
-        `;
+		          <div class="rule-name">${rule.name}</div>
+		          <div class="rule-type">${rule.type === 'area' ? '按面积计价' : rule.type === 'fixed' ? '一次性付费' : '免费'}</div>
+		      `;
 				ruleItem.onclick = () => selectRule(rule.id);
 				rulesList.appendChild(ruleItem);
 			});
