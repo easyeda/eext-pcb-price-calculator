@@ -4,14 +4,14 @@
 	"displayName": "PCB价格计算工具",
 	"description": "支持离线计算PCB下单价格，可添加多个规则场景，自定义添加计算参数，已内置嘉立创常用价格规则",
 	"version": "1.10.2",
-	"publisher": "JLCEDA <support@lceda.cn>",
+	"publisher": "JLCEDA",
 	"engines": {
 		"eda": "^2.2.0"
 	},
 	"license": "Apache-2.0",
 	"repository": {
-		"type": "extension-store",
-		"url": ""
+		"type": "github",
+		"url": "https://github.com/easyeda/eext-pcb-price-calculator"
 	},
 	"categories": "PCB",
 	"keywords": ["PCB", "Price"],
