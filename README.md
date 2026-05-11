@@ -1,5 +1,7 @@
 # eext-pcb-price-calculator
 
+[English](./README.en.md)
+
 EasyEDA Pro 扩展：离线 PCB 价格计算器
 
 ## 简介
