@@ -18,7 +18,7 @@
 						<div class="rule-type">按面积计价</div>
 					</div>
 				</div>
-				<button class="btn btn-secondary" style="width: 100%; margin-top: 20px" onclick="showNewRuleModal()">+ 新建规则</button>
+				<button class="btn btn-primary btn-small" style="width: 100%; margin-top: 12px" onclick="showNewRuleModal()">新建规则</button>
 			</aside>
 
 			<!-- 主内容区 -->
@@ -26,12 +26,12 @@
 				<!-- 工具栏 -->
 				<div class="toolbar">
 					<div class="toolbar-left">
-						<button class="btn btn-primary" onclick="GetPcbInfomation()">📐 识别PCB信息</button>
-						<button class="btn btn-secondary" onclick="calculatePrice()">💰 计算价格</button>
+						<button class="btn btn-primary" onclick="GetPcbInfomation()">识别PCB信息</button>
+						<button class="btn btn-primary" onclick="calculatePrice()">计算价格</button>
 					</div>
 					<div class="toolbar-right">
-						<button class="btn btn-secondary" onclick="exportRules()">📤 导出规则</button>
-						<button class="btn btn-secondary" onclick="importRules()">📥 导入规则</button>
+						<button class="btn btn-default" onclick="exportRules()">导出规则</button>
+						<button class="btn btn-default" onclick="importRules()">导入规则</button>
 					</div>
 				</div>
 
@@ -92,11 +92,9 @@
 
 						<div class="form-section">
 							<h3>PCB工艺</h3>
-							<div id="processList">
-								<!-- 动态生成的工艺项 -->
-							</div>
-							<button class="btn btn-secondary" style="width: 100%; margin-top: 10px" onclick="showAddProcessModal()">
-								+ 添加自定义工艺
+							<div id="processList"></div>
+							<button class="btn btn-default btn-small" style="width: 100%; margin-top: 8px" onclick="showAddProcessModal()">
+								添加自定义工艺
 							</button>
 						</div>
 					</div>
@@ -106,9 +104,9 @@
 						<div class="form-section">
 							<h3>计价方式</h3>
 							<div class="tabs">
-								<button class="tab active" onclick="switchTab('area')">按面积计价</button>
-								<button class="tab" onclick="switchTab('fixed')">一次性付费</button>
-								<button class="tab" onclick="switchTab('free')">免费</button>
+								<button class="tab active" data-tab="area" onclick="switchTab('area')">按面积计价</button>
+								<button class="tab" data-tab="fixed" onclick="switchTab('fixed')">一次性付费</button>
+								<button class="tab" data-tab="free" onclick="switchTab('free')">免费</button>
 							</div>
 
 							<div id="area-tab" class="tab-content active">
@@ -120,7 +118,7 @@
 									<label>附加价格 (元)</label>
 									<input type="number" id="extra-price-area" class="form-control" value="10" step="0.01" />
 								</div>
-								<p style="color: #5a6c7d; font-size: 14px; margin-top: 10px">计算公式：(基础价格 × 面积) + 附加价格</p>
+								<p style="color: #5a6c7d; font-size: 12px; margin-top: 8px">=(基础价格 × 面积) + 附加价格</p>
 							</div>
 
 							<div id="fixed-tab" class="tab-content">
@@ -132,723 +130,840 @@
 									<label>面积系数</label>
 									<input type="number" id="area-factor" class="form-control" value="0.1" step="0.01" />
 								</div>
-								<p style="color: #5a6c7d; font-size: 14px; margin-top: 10px">计算公式：基础价格 + (面积系数 × 面积)</p>
+								<p style="color: #5a6c7d; font-size: 12px; margin-top: 8px">=基础价格 + (面积系数 × 面积)</p>
 							</div>
 
 							<div id="free-tab" class="tab-content">
-								<p style="color: #5a6c7d; font-size: 14px">此规则下所有订单免费</p>
+								<p style="color: #5a6c7d; font-size: 12px">此规则下所有订单免费</p>
 							</div>
 						</div>
 
 						<div class="form-section">
 							<h3>条件规则</h3>
-							<div id="conditionsList">
-								<!-- 动态生成的条件规则 -->
-							</div>
-							<button class="btn btn-secondary" style="width: 100%; margin-top: 10px" onclick="addCondition()">+ 添加条件规则</button>
+							<div id="conditionsList"></div>
+							<button class="btn btn-default btn-small" style="width: 100%; margin-top: 8px" onclick="addCondition()">
+								添加条件规则
+							</button>
 						</div>
 					</div>
 				</div>
 			</main>
 		</div>
 
-		<!-- 固定在底部的价格显示 -->
+		<!-- 固定价格显示 -->
 		<div class="price-display-fixed">
 			<div class="price-label">预估价格</div>
 			<div class="price-value" id="finalPrice">¥0.00</div>
 		</div>
 
-		<!-- 新建规则模态框 -->
+		<!-- ==================== 新建规则模态框 ==================== -->
 		<div id="newRuleModal" class="modal">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h3>新建计价规则</h3>
-				</div>
-				<div class="modal-body">
-					<div class="form-group">
-						<label>规则名称</label>
-						<input type="text" id="newRuleName" class="form-control" placeholder="输入规则名称" />
+			<div class="modal-mask" onclick="closeModal('newRuleModal')"></div>
+			<div class="modal-dialog-box">
+				<div class="modal-dialog modal-dialog-sm">
+					<div class="modal-header">
+						<h3>新建计价规则</h3>
+						<button class="modal-close" onclick="closeModal('newRuleModal')">&times;</button>
 					</div>
-					<div class="form-group">
-						<label>计价方式</label>
-						<select id="newRuleType" class="form-control">
-							<option value="area">按面积计价</option>
-							<option value="fixed">一次性付费</option>
-							<option value="free">免费</option>
-						</select>
+					<div class="modal-body">
+						<div class="form-group">
+							<label>规则名称</label>
+							<input type="text" id="newRuleName" class="form-control" placeholder="输入规则名称" />
+						</div>
+						<div class="form-group">
+							<label>计价方式</label>
+							<select id="newRuleType" class="form-control">
+								<option value="area">按面积计价</option>
+								<option value="fixed">一次性付费</option>
+								<option value="free">免费</option>
+							</select>
+						</div>
 					</div>
-				</div>
-				<div class="modal-footer">
-					<button class="btn btn-secondary" onclick="closeModal('newRuleModal')">取消</button>
-					<button class="btn btn-primary" onclick="createNewRule()">创建</button>
+					<div class="modal-footer">
+						<button class="btn btn-default" onclick="closeModal('newRuleModal')">取消</button>
+						<button class="btn btn-primary" onclick="createNewRule()">创建</button>
+					</div>
 				</div>
 			</div>
 		</div>
 
-		<!-- 添加工艺模态框 -->
+		<!-- ==================== 添加工艺模态框 ==================== -->
 		<div id="addProcessModal" class="modal">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h3>添加自定义工艺</h3>
-				</div>
-				<div class="modal-body">
-					<div class="form-group">
-						<label>工艺名称</label>
-						<input type="text" id="processName" class="form-control" placeholder="输入工艺名称" />
+			<div class="modal-mask" onclick="closeModal('addProcessModal')"></div>
+			<div class="modal-dialog-box">
+				<div class="modal-dialog modal-dialog-sm">
+					<div class="modal-header">
+						<h3>添加自定义工艺</h3>
+						<button class="modal-close" onclick="closeModal('addProcessModal')">&times;</button>
 					</div>
-					<div class="form-group">
-						<label>输入类型</label>
-						<select id="processType" class="form-control" onchange="toggleProcessInput()">
-							<option value="select">下拉选择</option>
-							<option value="input">数值输入</option>
-							<option value="color">颜色选择</option>
-						</select>
+					<div class="modal-body">
+						<div class="form-group">
+							<label>工艺名称</label>
+							<input type="text" id="processName" class="form-control" placeholder="输入工艺名称" />
+						</div>
+						<div class="form-group">
+							<label>输入类型</label>
+							<select id="processType" class="form-control" onchange="toggleProcessInput()">
+								<option value="select">下拉选择</option>
+								<option value="input">数值输入</option>
+								<option value="color">颜色选择</option>
+							</select>
+						</div>
+						<div class="form-group" id="processOptionsGroup">
+							<label>选项值（每行一个）</label>
+							<textarea id="processOptions" class="form-control" rows="4" placeholder="选项1&#10;选项2&#10;选项3"></textarea>
+						</div>
 					</div>
-					<div class="form-group" id="processOptionsGroup">
-						<label>选项值（每行一个）</label>
-						<textarea id="processOptions" class="form-control" rows="4" placeholder="选项1&#10;选项2&#10;选项3"></textarea>
+					<div class="modal-footer">
+						<button class="btn btn-default" onclick="closeModal('addProcessModal')">取消</button>
+						<button class="btn btn-primary" onclick="addCustomProcess()">添加</button>
 					</div>
-				</div>
-				<div class="modal-footer">
-					<button class="btn btn-secondary" onclick="closeModal('addProcessModal')">取消</button>
-					<button class="btn btn-primary" onclick="addCustomProcess()">添加</button>
 				</div>
 			</div>
 		</div>
 
-		<!-- 编辑工艺模态框 -->
+		<!-- ==================== 编辑工艺模态框 ==================== -->
 		<div id="editProcessModal" class="modal">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h3>编辑自定义工艺</h3>
-				</div>
-				<div class="modal-body">
-					<input type="hidden" id="editProcessId" />
-					<div class="form-group">
-						<label>工艺名称</label>
-						<input type="text" id="editProcessName" class="form-control" placeholder="输入工艺名称" />
+			<div class="modal-mask" onclick="closeModal('editProcessModal')"></div>
+			<div class="modal-dialog-box">
+				<div class="modal-dialog modal-dialog-sm">
+					<div class="modal-header">
+						<h3>编辑自定义工艺</h3>
+						<button class="modal-close" onclick="closeModal('editProcessModal')">&times;</button>
 					</div>
-					<div class="form-group">
-						<label>输入类型</label>
-						<select id="editProcessType" class="form-control" onchange="toggleEditProcessInput()">
-							<option value="select">下拉选择</option>
-							<option value="input">数值输入</option>
-							<option value="color">颜色选择</option>
-						</select>
+					<div class="modal-body">
+						<input type="hidden" id="editProcessId" />
+						<div class="form-group">
+							<label>工艺名称</label>
+							<input type="text" id="editProcessName" class="form-control" placeholder="输入工艺名称" />
+						</div>
+						<div class="form-group">
+							<label>输入类型</label>
+							<select id="editProcessType" class="form-control" onchange="toggleEditProcessInput()">
+								<option value="select">下拉选择</option>
+								<option value="input">数值输入</option>
+								<option value="color">颜色选择</option>
+							</select>
+						</div>
+						<div class="form-group" id="editProcessOptionsGroup" style="display: none">
+							<label>选项值（每行一个）</label>
+							<textarea id="editProcessOptions" class="form-control" rows="4" placeholder="选项1&#10;选项2&#10;选项3"></textarea>
+						</div>
 					</div>
-					<div class="form-group" id="editProcessOptionsGroup" style="display: none">
-						<label>选项值（每行一个）</label>
-						<textarea id="editProcessOptions" class="form-control" rows="4" placeholder="选项1&#10;选项2&#10;选项3"></textarea>
+					<div class="modal-footer">
+						<button class="btn btn-default" onclick="closeModal('editProcessModal')">取消</button>
+						<button class="btn btn-primary" onclick="saveEditProcess()">保存</button>
 					</div>
-				</div>
-				<div class="modal-footer">
-					<button class="btn btn-secondary" onclick="closeModal('editProcessModal')">取消</button>
-					<button class="btn btn-primary" onclick="saveEditProcess()">保存</button>
 				</div>
 			</div>
 		</div>
 	</body>
 
 	<script>
-				// 全局变量
-				// allRules 将作为唯一的数据源，存储所有规则
-				let allRules = {
-					'default': {
-						id: 'default',
-						name: '默认规则',
-						type: 'area',
-						basePrice: 0.5,
-						extraPrice: 10,
-						conditions: [],
-						customProcesses: [], // 每个规则都有自己的自定义工艺
-					},
+		// ==================== 全局变量 ====================
+		let allRules = {
+			'default': {
+				id: 'default',
+				name: '默认规则',
+				type: 'area',
+				basePrice: 0.5,
+				extraPrice: 10,
+				conditions: [],
+				customProcesses: [],
+			},
+		};
+		let currentRuleId = 'default';
+		let allProcesses = [];
+
+		// ==================== 初始化 ====================
+		document.addEventListener('DOMContentLoaded', function () {
+			initializeProcesses();
+			renderProcesses();
+			renderRulesList();
+			selectRule('default');
+			renderConditions();
+		});
+
+		function initializeProcesses() {
+			allProcesses = [
+				{ id: 'put_together', name: '拼板款数', type: 'input', unit: '个' },
+				{ id: 'delivery', name: '出货方式', type: 'select', options: ['单片', '拼板'] },
+				{ id: 'copper_thick', name: '外层铜厚', type: 'input', unit: '盎司' },
+				{ id: 'soldermask_color', name: '阻焊颜色', type: 'color', default: '#2E8B57' },
+				{ id: 'content_color', name: '字符颜色', type: 'color', default: '#ffffff' },
+				{
+					id: 'solder_cover',
+					name: '阻焊覆盖',
+					type: 'select',
+					options: ['过孔盖油', '过孔开窗', '过孔塞油', '过孔塞树脂+过孔电镀盖帽', '过孔塞铜浆+过孔电镀盖帽'],
+				},
+				{ id: 'solder_cover_type', name: '焊盘喷锡', type: 'select', options: ['有铅喷锡', '无铅喷锡', '沉金'] },
+				{
+					id: 'min_hole_diameter',
+					name: '最小孔径/外径',
+					type: 'select',
+					options: ['0.3mm(外径0.4/0.45)', '0.25mm(外径0.35/0.4)', '0.2mm(外径0.3/0.35)', '0.15mm(外径0.25/0.3)'],
+				},
+				{ id: 'gold_finger_bevel', name: '金(锡)手指斜边', type: 'select', options: ['不需要', '需要'] },
+				{ id: 'line_test', name: '线路测试', type: 'select', options: ['AOI全测+飞针全测'] },
+			];
+		}
+
+		// ==================== 渲染函数 ====================
+		// 持久化存储所有工艺控件值，防止 renderProcesses 重建 DOM 时丢失用户选择
+		let savedProcessValues = {};
+
+		function saveProcessValues() {
+			const allProcessIds = [...allProcesses, ...(allRules[currentRuleId] ? allRules[currentRuleId].customProcesses || [] : [])];
+			allProcessIds.forEach(function (p) {
+				const el = document.getElementById('process-' + p.id);
+				if (el) {
+					if (p.type === 'color') {
+						savedProcessValues[p.id] = el.value;
+						// 同时保存颜色显示文本
+						const span = el.nextElementSibling;
+						if (span) {
+							savedProcessValues[p.id + '_label'] = span.textContent;
+						}
+					} else {
+						savedProcessValues[p.id] = el.value;
+					}
+				}
+			});
+		}
+
+		function renderProcesses() {
+			const processList = document.getElementById('processList');
+			processList.innerHTML = '';
+			const currentRule = allRules[currentRuleId];
+			const currentCustomProcesses = currentRule ? currentRule.customProcesses : [];
+
+			[...allProcesses, ...currentCustomProcesses].forEach(function (process) {
+				const savedVal = savedProcessValues[process.id];
+				const processItem = document.createElement('div');
+				processItem.className = 'process-item';
+				processItem.innerHTML =
+					'<div class="process-name">' +
+					process.name +
+					'</div>' +
+					'<div class="process-control">' +
+					renderProcessControl(process, savedVal) +
+					'</div>' +
+					(process.custom
+						? '<div class="process-actions">' +
+							'<button class="icon-btn" onclick="editProcess(\'' +
+							process.id +
+							'\')" title="编辑">&#9998;</button>' +
+							'<button class="icon-btn icon-btn-danger" onclick="deleteProcess(\'' +
+							process.id +
+							'\')" title="删除">&times;</button>' +
+							'</div>'
+						: '');
+				processList.appendChild(processItem);
+			});
+		}
+
+		function renderProcessControl(process, savedVal) {
+			switch (process.type) {
+				case 'select':
+					return (
+						'<select id="process-' +
+						process.id +
+						'" class="form-control" onchange="saveCurrentProcessValue(\'' +
+						process.id +
+						'\')">' +
+						process.options
+							.map(function (opt) {
+								var sel = savedVal !== undefined && savedVal === opt ? ' selected' : '';
+								return '<option value="' + opt + '"' + sel + '>' + opt + '</option>';
+							})
+							.join('') +
+						'</select>'
+					);
+				case 'input':
+					var inputVal = savedVal !== undefined && savedVal !== '' ? ' value="' + savedVal + '"' : '';
+					return (
+						'<div class="input-group">' +
+						'<input type="number" id="process-' +
+						process.id +
+						'" class="form-control" placeholder="输入数值"' +
+						inputVal +
+						' onchange="saveCurrentProcessValue(\'' +
+						process.id +
+						'\')">' +
+						(process.unit ? '<span class="unit">' + process.unit + '</span>' : '') +
+						'</div>'
+					);
+				case 'color':
+					var colorVal = savedVal || process.default || '#000000';
+					var colorLabel = savedProcessValues[process.id + '_label'] || colorVal;
+					return (
+						'<div class="color-picker-wrapper">' +
+						'<input type="color" id="process-' +
+						process.id +
+						'" class="color-picker" value="' +
+						colorVal +
+						'" onchange="saveCurrentProcessValue(\'' +
+						process.id +
+						'\')">' +
+						'<span>' +
+						colorLabel +
+						'</span>' +
+						'</div>'
+					);
+				default:
+					return '';
+			}
+		}
+
+		function saveCurrentProcessValue(processId) {
+			var el = document.getElementById('process-' + processId);
+			if (!el) return;
+			savedProcessValues[processId] = el.value;
+			// 颜色选择器同时保存标签
+			var process = [...allProcesses, ...(allRules[currentRuleId] ? allRules[currentRuleId].customProcesses || [] : [])].find(function (p) {
+				return p.id === processId;
+			});
+			if (process && process.type === 'color') {
+				var span = el.nextElementSibling;
+				if (span) {
+					savedProcessValues[processId + '_label'] = span.textContent;
+				}
+			}
+		}
+
+		// 查找工艺定义（含自定义工艺）
+		function findProcess(processId) {
+			return [...allProcesses, ...(allRules[currentRuleId] ? allRules[currentRuleId].customProcesses || [] : [])].find(function (p) {
+				return p.id === processId;
+			});
+		}
+
+		function renderConditionValueControl(condition) {
+			var process = findProcess(condition.process);
+			// 如果关联的工艺是下拉类型，渲染为下拉选择
+			if (process && process.type === 'select' && process.options) {
+				return (
+					'<select class="condition-input" onchange="updateCondition(' +
+					condition.id +
+					",'value',this.value)\">" +
+					'<option value="">选择值</option>' +
+					process.options
+						.map(function (opt) {
+							return '<option value="' + opt + '"' + (condition.value === opt ? ' selected' : '') + '>' + opt + '</option>';
+						})
+						.join('') +
+					'</select>'
+				);
+			}
+			// 其它类型（input/color/未关联工艺）用文本输入
+			return (
+				'<input type="text" class="condition-input" placeholder="值" value="' +
+				(condition.value || '') +
+				'" onchange="updateCondition(' +
+				condition.id +
+				",'value',this.value)\">"
+			);
+		}
+
+		function renderConditions() {
+			var conditionsList = document.getElementById('conditionsList');
+			conditionsList.innerHTML = '';
+			var currentRule = allRules[currentRuleId];
+			if (!currentRule || currentRule.conditions.length === 0) {
+				conditionsList.innerHTML = '<p style="color:#5a6c7d;text-align:center;font-size:12px">暂无条件规则</p>';
+				return;
+			}
+
+			currentRule.conditions.forEach(function (condition) {
+				var conditionDiv = document.createElement('div');
+				conditionDiv.className = 'condition-rule';
+				conditionDiv.innerHTML =
+					'<div class="condition-header">' +
+					'<span class="condition-title">条件规则 #' +
+					condition.id +
+					'</span>' +
+					'<button class="icon-btn icon-btn-danger" onclick="removeCondition(' +
+					condition.id +
+					')" title="删除">&times;</button>' +
+					'</div>' +
+					'<div class="condition-body">' +
+					'<span>如果</span>' +
+					'<select class="condition-select" onchange="onConditionProcessChange(' +
+					condition.id +
+					',this.value)">' +
+					'<option value="">选择工艺</option>' +
+					[...allProcesses, ...(currentRule.customProcesses || [])]
+						.map(function (p) {
+							return '<option value="' + p.id + '"' + (condition.process === p.id ? ' selected' : '') + '>' + p.name + '</option>';
+						})
+						.join('') +
+					'</select>' +
+					'<select class="condition-select" onchange="updateCondition(' +
+					condition.id +
+					",'operator',this.value)\">" +
+					['=', '>', '<', '>=', '<=']
+						.map(function (op) {
+							return '<option value="' + op + '"' + (condition.operator === op ? ' selected' : '') + '>' + op + '</option>';
+						})
+						.join('') +
+					'</select>' +
+					renderConditionValueControl(condition) +
+					'<span>则价格</span>' +
+					'<select class="condition-select" onchange="updateCondition(' +
+					condition.id +
+					",'action',this.value)\">" +
+					'<option value="+"' +
+					(condition.action === '+' ? ' selected' : '') +
+					'>+</option>' +
+					'<option value="-"' +
+					(condition.action === '-' ? ' selected' : '') +
+					'>-</option>' +
+					'<option value="*"' +
+					(condition.action === '*' ? ' selected' : '') +
+					'>x</option>' +
+					'<option value="/"' +
+					(condition.action === '/' ? ' selected' : '') +
+					'>/</option>' +
+					'</select>' +
+					'<input type="number" class="condition-input" placeholder="金额" value="' +
+					condition.amount +
+					'" onchange="updateCondition(' +
+					condition.id +
+					",'amount',this.value)\">" +
+					'</div>';
+				conditionsList.appendChild(conditionDiv);
+			});
+		}
+
+		// 条件关联的工艺改变时：更新 process 字段，若新旧工艺类型不同则重置 value
+		function onConditionProcessChange(conditionId, newProcessId) {
+			var condition = allRules[currentRuleId].conditions.find(function (c) {
+				return c.id === conditionId;
+			});
+			if (!condition) return;
+			var oldProcess = findProcess(condition.process);
+			condition.process = newProcessId;
+			var newProcess = findProcess(newProcessId);
+			// 工艺类型变了（select ↔ input），清空旧值，避免"沉金"去匹配数值
+			if (!oldProcess || !newProcess || oldProcess.type !== newProcess.type) {
+				condition.value = '';
+			}
+			renderConditions();
+		}
+
+		// ==================== 规则管理 ====================
+		function renderRulesList() {
+			const rulesList = document.getElementById('rulesList');
+			rulesList.innerHTML = '';
+			Object.values(allRules).forEach(function (rule) {
+				const ruleItem = document.createElement('div');
+				ruleItem.className = 'rule-item';
+				ruleItem.dataset.ruleId = rule.id;
+				ruleItem.innerHTML =
+					'<div class="rule-name">' +
+					rule.name +
+					'</div>' +
+					'<div class="rule-type">' +
+					(rule.type === 'area' ? '按面积计价' : rule.type === 'fixed' ? '一次性付费' : '免费') +
+					'</div>';
+				ruleItem.onclick = function () {
+					selectRule(rule.id);
 				};
-				// currentRuleId 只存储当前选中规则的ID
-				let currentRuleId = 'default';
+				rulesList.appendChild(ruleItem);
+			});
+		}
 
-				let allProcesses = [];
+		function selectRule(ruleId) {
+			if (!allRules[ruleId]) {
+				return;
+			}
+			currentRuleId = ruleId;
+			const currentRule = allRules[currentRuleId];
 
-				// 初始化
-				document.addEventListener('DOMContentLoaded', function () {
-					initializeProcesses();
-					renderProcesses();
-					renderRulesList(); // 新增：统一渲染规则列表
-					selectRule('default'); // 初始化时选中默认规则
-					renderConditions();
+			document.querySelectorAll('.rule-item').forEach(function (item) {
+				item.classList.remove('active');
+			});
+			const selectedItem = document.querySelector('[data-rule-id="' + ruleId + '"]');
+			if (selectedItem) {
+				selectedItem.classList.add('active');
+			}
+
+			document.querySelectorAll('.tab').forEach(function (t) {
+				t.classList.remove('active');
+			});
+			document.querySelectorAll('.tab-content').forEach(function (c) {
+				c.classList.remove('active');
+			});
+
+			const activeTab = document.querySelector('.tab[data-tab="' + currentRule.type + '"]');
+			if (activeTab) {
+				activeTab.classList.add('active');
+				document.getElementById(currentRule.type + '-tab').classList.add('active');
+			}
+
+			renderProcesses();
+			renderConditions();
+		}
+
+		// ==================== 条件规则 ====================
+		function addCondition() {
+			const condition = {
+				id: Date.now(),
+				process: '',
+				operator: '=',
+				value: '',
+				action: '+',
+				amount: 0,
+			};
+			allRules[currentRuleId].conditions.push(condition);
+			renderConditions();
+		}
+
+		function updateCondition(id, field, value) {
+			const condition = allRules[currentRuleId].conditions.find(function (c) {
+				return c.id === id;
+			});
+			if (condition) {
+				condition[field] = field === 'amount' ? parseFloat(value) || 0 : value;
+			}
+		}
+
+		function removeCondition(id) {
+			allRules[currentRuleId].conditions = allRules[currentRuleId].conditions.filter(function (c) {
+				return c.id !== id;
+			});
+			renderConditions();
+		}
+
+		// ==================== 标签页 ====================
+		function switchTab(tab) {
+			document.querySelectorAll('.tab').forEach(function (t) {
+				t.classList.remove('active');
+			});
+			document.querySelectorAll('.tab-content').forEach(function (c) {
+				c.classList.remove('active');
+			});
+			event.target.classList.add('active');
+			document.getElementById(tab + '-tab').classList.add('active');
+			allRules[currentRuleId].type = tab;
+		}
+
+		// ==================== 工艺管理 ====================
+		function showAddProcessModal() {
+			document.getElementById('addProcessModal').classList.add('show');
+		}
+
+		function toggleProcessInput() {
+			const type = document.getElementById('processType').value;
+			document.getElementById('processOptionsGroup').style.display = type === 'select' ? 'block' : 'none';
+		}
+
+		function addCustomProcess() {
+			const name = document.getElementById('processName').value;
+			const type = document.getElementById('processType').value;
+			const options = document
+				.getElementById('processOptions')
+				.value.split('\n')
+				.filter(function (o) {
+					return o.trim();
 				});
 
-				// 初始化工艺列表
-				function initializeProcesses() {
-					allProcesses = [
-						{
-							id: 'put_together',
-							name: '拼板款数',
-							type: 'input',
-							unit: '个',
-						},
-						{
-							id: 'delivery',
-							name: '出货方式',
-							type: 'select',
-							options: ['单片', '拼板'],
-						},
-						{
-							id: 'copper_thick',
-							name: '外层铜厚',
-							type: 'input',
-							unit: '盎司',
-						},
-						{
-							id: 'soldermask_color',
-							name: '阻焊颜色',
-							type: 'color',
-							default: '#2E8B57',
-						},
-						{
-							id: 'content_color',
-							name: '字符颜色',
-							type: 'color',
-							default: '#ffffff',
-						},
-						{
-							id: 'solder_cover',
-							name: '阻焊覆盖',
-							type: 'select',
-							options: ['过孔盖油', '过孔开窗', '过孔塞油', '过孔塞树脂+过孔电镀盖帽', '过孔塞铜浆+过孔电镀盖帽'],
-						},
-						{
-							id: 'solder_cover_type',
-							name: '焊盘喷锡',
-							type: 'select',
-							options: ['有铅喷锡', '无铅喷锡', '沉金'],
-						},
-						{
-							id: 'min_hole_diameter',
-							name: '最小孔径/外径',
-							type: 'select',
-							options: ['0.3mm(外径0.4/0.45)', '0.25mm(外径0.35/0.4)', '0.2mm(外径0.3/0.35)', '0.15mm(外径0.25/0.3)'],
-						},
-						{
-							id: 'gold_finger_bevel',
-							name: '金(锡)手指斜边',
-							type: 'select',
-							options: ['不需要', '需要'],
-						},
-						{
-							id: 'line_test',
-							name: '线路测试',
-							type: 'select',
-							options: ['AOI全测+飞针全测'],
-						},
-					];
-				}
+			if (!name) {
+				alert('请输入工艺名称');
+				return;
+			}
+			if (type === 'select' && options.length === 0) {
+				alert('请添加选项值');
+				return;
+			}
 
-				// 渲染工艺列表
-				function renderProcesses() {
-					const processList = document.getElementById('processList');
-					processList.innerHTML = '';
+			const process = { id: 'custom_' + Date.now(), name: name, type: type, options: options, custom: true };
+			if (!allRules[currentRuleId].customProcesses) {
+				allRules[currentRuleId].customProcesses = [];
+			}
+			allRules[currentRuleId].customProcesses.push(process);
 
-					// 获取当前规则的自定义工艺
-					const currentRule = allRules[currentRuleId];
-					const currentCustomProcesses = currentRule ? currentRule.customProcesses : [];
+			renderProcesses();
+			renderConditions();
+			closeModal('addProcessModal');
+			document.getElementById('processName').value = '';
+			document.getElementById('processOptions').value = '';
+		}
 
-					[...allProcesses, ...currentCustomProcesses].forEach((process) => {
-						const processItem = document.createElement('div');
-						processItem.className = 'process-item';
-						processItem.innerHTML = `
-				          <div class="process-name">${process.name}</div>
-				          <div class="process-control">
-				              ${renderProcessControl(process)}
-				          </div>
-				          ${
-						process.custom
-							? `
-				              <div class="process-actions">
-				                  <button class="icon-btn" onclick="editProcess('${process.id}')">✏️</button>
-				                  <button class="icon-btn" onclick="deleteProcess('${process.id}')">🗑️</button>
-				              </div>
-				          `
-							: ''
-					}
-				      `;
-						processList.appendChild(processItem);
+		function deleteProcess(processId) {
+			if (confirm('确定要删除这个工艺吗？')) {
+				const currentRule = allRules[currentRuleId];
+				if (currentRule && currentRule.customProcesses) {
+					currentRule.customProcesses = currentRule.customProcesses.filter(function (p) {
+						return p.id !== processId;
 					});
-				}
-
-				// 渲染工艺控件
-				function renderProcessControl(process) {
-					switch (process.type) {
-						case 'select':
-							return `<select id="process-${process.id}" class="form-control">
-				              ${process.options.map((opt) => `<option value="${opt}">${opt}</option>`).join('')}
-				          </select>`;
-						case 'input':
-							return `<div class="input-group">
-				              <input type="number" id="process-${process.id}" class="form-control" placeholder="输入数值">
-				              ${process.unit ? `<span class="unit">${process.unit}</span>` : ''}
-				          </div>`;
-						case 'color':
-							return `<div class="color-picker-wrapper">
-				              <input type="color" id="process-${process.id}" class="color-picker" value="${process.default || '#000000'}">
-				              <span>${process.default || '#000000'}</span>
-				          </div>`;
-						default:
-							return '';
-					}
-				}
-
-				// 添加条件规则
-				function addCondition() {
-					const condition = {
-						id: Date.now(),
-						process: '',
-						operator: '=',
-						value: '',
-						action: '+',
-						amount: 0,
-					};
-					// 通过 currentRuleId 获取当前规则
-					allRules[currentRuleId].conditions.push(condition);
-					renderConditions();
-				}
-
-				// 渲染条件规则
-				function renderConditions() {
-					const conditionsList = document.getElementById('conditionsList');
-					conditionsList.innerHTML = '';
-
-					const currentRule = allRules[currentRuleId];
-					if (!currentRule || currentRule.conditions.length === 0) {
-						conditionsList.innerHTML = '<p style="color: #5a6c7d; text-align: center;">暂无条件规则</p>';
-						return;
-					}
-
-					currentRule.conditions.forEach((condition) => {
-						const conditionDiv = document.createElement('div');
-						conditionDiv.className = 'condition-rule';
-						conditionDiv.innerHTML = `
-				          <div class="condition-header">
-				              <span class="condition-title">条件规则 #${condition.id}</span>
-				              <button class="icon-btn" onclick="removeCondition(${condition.id})">❌</button>
-				          </div>
-				          <div class="condition-body">
-				              <span>如果</span>
-				              <select class="condition-select" onchange="updateCondition(${condition.id}, 'process', this.value)">
-				                  <option value="">选择工艺</option>
-				                  ${[...allProcesses, ...(currentRule.customProcesses || [])]
-								.map((p) => `<option value="${p.id}" ${condition.process === p.id ? 'selected' : ''}>${p.name}</option>`)
-								.join('')}
-				              </select>
-				              <select class="condition-select" onchange="updateCondition(${condition.id}, 'operator', this.value)">
-				                  <option value="=" ${condition.operator === '=' ? 'selected' : ''}>=</option>
-				                  <option value=">" ${condition.operator === '>' ? 'selected' : ''}>></option>
-				                  <option value="<" ${condition.operator === '<' ? 'selected' : ''}><</option>
-				                  <option value=">=" ${condition.operator === '>=' ? 'selected' : ''}>>=</option>
-				                  <option value="<=" ${condition.operator === '<=' ? 'selected' : ''}<=</option>
-				              </select>
-				              <input type="text" class="condition-input" placeholder="值" value="${condition.value}"
-				                     onchange="updateCondition(${condition.id}, 'value', this.value)">
-				              <span>则价格</span>
-				              <select class="condition-select" onchange="updateCondition(${condition.id}, 'action', this.value)">
-				                  <option value="+" ${condition.action === '+' ? 'selected' : ''}>+</option>
-				                  <option value="-" ${condition.action === '-' ? 'selected' : ''}>-</option>
-				                  <option value="*" ${condition.action === '*' ? 'selected' : ''}>×</option>
-				                  <option value="/" ${condition.action === '/' ? 'selected' : ''}>÷</option>
-				              </select>
-				              <input type="number" class="condition-input" placeholder="金额" value="${condition.amount}"
-				                     onchange="updateCondition(${condition.id}, 'amount', this.value)">
-				          </div>
-				      `;
-						conditionsList.appendChild(conditionDiv);
-					});
-				}
-
-				// 更新条件
-				function updateCondition(id, field, value) {
-					const condition = allRules[currentRuleId].conditions.find((c) => c.id === id);
-					if (condition) {
-						condition[field] = field === 'amount' ? parseFloat(value) || 0 : value;
-					}
-				}
-
-				// 删除条件
-				function removeCondition(id) {
-					allRules[currentRuleId].conditions = allRules[currentRuleId].conditions.filter((c) => c.id !== id);
-					renderConditions();
-				}
-
-				// 切换标签页
-				function switchTab(tab) {
-					document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
-					document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('active'));
-
-					event.target.classList.add('active');
-					document.getElementById(`${tab}-tab`).classList.add('active');
-
-					// 更新当前规则的类型
-					allRules[currentRuleId].type = tab;
-				}
-
-				function toggleEditProcessInput() {
-					const type = document.getElementById('editProcessType').value;
-					const optionsGroup = document.getElementById('editProcessOptionsGroup');
-					optionsGroup.style.display = type === 'select' ? 'block' : 'none';
-				}
-
-				// 计算价格
-				function calculatePrice() {
-					const length = parseFloat(document.getElementById('length-input').value) || 0;
-					const width = parseFloat(document.getElementById('width-input').value) || 0;
-					const area = length * width;
-
-					let price = 0;
-					const currentRule = allRules[currentRuleId];
-
-					switch (currentRule.type) {
-						case 'area':
-							const basePrice = parseFloat(document.getElementById('base-price-area').value) || 0;
-							const extraPrice = parseFloat(document.getElementById('extra-price-area').value) || 0;
-							price = basePrice * area + extraPrice;
-							break;
-						case 'fixed':
-							const fixedBase = parseFloat(document.getElementById('base-price-fixed').value) || 0;
-							const areaFactor = parseFloat(document.getElementById('area-factor').value) || 0;
-							price = fixedBase + areaFactor * area;
-							break;
-						case 'free':
-							price = 0;
-							break;
-					}
-
-					// 应用条件规则
-					currentRule.conditions.forEach((condition) => {
-						const processValue = getProcessValue(condition.process);
-						if (evaluateCondition(processValue, condition.operator, condition.value)) {
-							switch (condition.action) {
-								case '+':
-									price += condition.amount;
-									break;
-								case '-':
-									price -= condition.amount;
-									break;
-								case '*':
-									price *= condition.amount;
-									break;
-								case '/':
-									price /= condition.amount;
-									break;
-							}
-						}
-					});
-
-					document.getElementById('finalPrice').textContent = `¥${price.toFixed(2)}`;
-				}
-
-				// 获取工艺值
-				function getProcessValue(processId) {
-					const element = document.getElementById(`process-${processId}`);
-					return element ? element.value : '';
-				}
-
-				// 评估条件
-				function evaluateCondition(actual, operator, expected) {
-					if (actual === undefined || actual === null || expected === '') return false;
-
-					const a = parseFloat(actual) || actual;
-					const e = parseFloat(expected) || expected;
-
-					switch (operator) {
-						case '=':
-							return a == e;
-						case '>':
-							return a > e;
-						case '<':
-							return a < e;
-						case '>=':
-							return a >= e;
-						case '<=':
-							return a <= e;
-						default:
-							return false;
-					}
-				}
-
-				// 显示新建规则模态框
-				function showNewRuleModal() {
-					document.getElementById('newRuleModal').classList.add('show');
-				}
-
-				// 显示添加工艺模态框
-				function showAddProcessModal() {
-					document.getElementById('addProcessModal').classList.add('show');
-				}
-
-				// 关闭模态框
-				function closeModal(modalId) {
-					document.getElementById(modalId).classList.remove('show');
-				}
-
-				// 创建新规则
-				function createNewRule() {
-					const name = document.getElementById('newRuleName').value;
-					const type = document.getElementById('newRuleType').value;
-
-					if (!name) {
-						alert('请输入规则名称');
-						return;
-					}
-
-					const newRule = {
-						id: Date.now().toString(),
-						name: name,
-						type: type,
-						basePrice: 0.5,
-						extraPrice: 10,
-						conditions: [],
-						customProcesses: [], // 每个规则都有自己的自定义工艺
-					};
-
-					// 保存到allRules
-					allRules[newRule.id] = newRule;
-
-					// 重新渲染规则列表
-					renderRulesList();
-
-					// 立即切换到新规则
-					selectRule(newRule.id);
-
-					closeModal('newRuleModal');
-					document.getElementById('newRuleName').value = '';
-				}
-
-				// 渲染规则列表 (新增函数，用于统一管理侧边栏)
-				function renderRulesList() {
-					const rulesList = document.getElementById('rulesList');
-					rulesList.innerHTML = ''; // 清空列表
-
-					Object.values(allRules).forEach((rule) => {
-						const ruleItem = document.createElement('div');
-						ruleItem.className = 'rule-item';
-						ruleItem.dataset.ruleId = rule.id;
-						ruleItem.innerHTML = `
-				          <div class="rule-name">${rule.name}</div>
-				          <div class="rule-type">${rule.type === 'area' ? '按面积计价' : rule.type === 'fixed' ? '一次性付费' : '免费'}</div>
-				      `;
-						ruleItem.onclick = () => selectRule(rule.id);
-						rulesList.appendChild(ruleItem);
-					});
-				}
-
-				// 选择规则 (已修复)
-				function selectRule(ruleId) {
-					// 检查规则是否存在
-					if (!allRules[ruleId]) {
-						console.error(`Rule with id ${ruleId} not found.`);
-						return;
-					}
-
-					// 更新当前规则ID
-					currentRuleId = ruleId;
-					const currentRule = allRules[currentRuleId];
-
-					// 更新UI选中状态
-					document.querySelectorAll('.rule-item').forEach((item) => item.classList.remove('active'));
-					const selectedItem = document.querySelector(`[data-rule-id="${ruleId}"]`);
-					if (selectedItem) {
-						selectedItem.classList.add('active');
-					}
-
-					// 更新标签页
-					document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
-					document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('active'));
-
-					const activeTab = document.querySelector(`.tab[data-tab="${currentRule.type}"]`);
-					if (activeTab) {
-						activeTab.classList.add('active');
-						document.getElementById(`${currentRule.type}-tab`).classList.add('active');
-					}
-
-					// 重新渲染工艺和条件
 					renderProcesses();
 					renderConditions();
 				}
+			}
+		}
 
-				// 添加自定义工艺
-				function addCustomProcess() {
-					const name = document.getElementById('processName').value;
-					const type = document.getElementById('processType').value;
-					const options = document
-						.getElementById('processOptions')
-						.value.split('\n')
-						.filter((o) => o.trim());
+		function editProcess(processId) {
+			const currentRule = allRules[currentRuleId];
+			if (!currentRule || !currentRule.customProcesses) return;
+			const process = currentRule.customProcesses.find(function (p) {
+				return p.id === processId;
+			});
+			if (!process) return;
 
-					if (!name) {
-						alert('请输入工艺名称');
-						return;
+			document.getElementById('editProcessId').value = processId;
+			document.getElementById('editProcessName').value = process.name;
+			document.getElementById('editProcessType').value = process.type;
+
+			if (process.type === 'select') {
+				document.getElementById('editProcessOptionsGroup').style.display = 'block';
+				document.getElementById('editProcessOptions').value = process.options ? process.options.join('\n') : '';
+			} else {
+				document.getElementById('editProcessOptionsGroup').style.display = 'none';
+			}
+			document.getElementById('editProcessModal').classList.add('show');
+		}
+
+		function saveEditProcess() {
+			const processId = document.getElementById('editProcessId').value;
+			const name = document.getElementById('editProcessName').value;
+			const type = document.getElementById('editProcessType').value;
+			const options = document
+				.getElementById('editProcessOptions')
+				.value.split('\n')
+				.filter(function (o) {
+					return o.trim();
+				});
+
+			if (!name) {
+				alert('请输入工艺名称');
+				return;
+			}
+			if (type === 'select' && options.length === 0) {
+				alert('请添加选项值');
+				return;
+			}
+
+			const currentRule = allRules[currentRuleId];
+			if (!currentRule || !currentRule.customProcesses) return;
+			const processIndex = currentRule.customProcesses.findIndex(function (p) {
+				return p.id === processId;
+			});
+			if (processIndex === -1) return;
+
+			currentRule.customProcesses[processIndex] = Object.assign({}, currentRule.customProcesses[processIndex], {
+				name: name,
+				type: type,
+				options: options,
+			});
+
+			renderProcesses();
+			renderConditions();
+			closeModal('editProcessModal');
+		}
+
+		function toggleEditProcessInput() {
+			const type = document.getElementById('editProcessType').value;
+			document.getElementById('editProcessOptionsGroup').style.display = type === 'select' ? 'block' : 'none';
+		}
+
+		// ==================== 模态框 ====================
+		function showNewRuleModal() {
+			document.getElementById('newRuleModal').classList.add('show');
+		}
+
+		function closeModal(modalId) {
+			document.getElementById(modalId).classList.remove('show');
+		}
+
+		function createNewRule() {
+			const name = document.getElementById('newRuleName').value;
+			const type = document.getElementById('newRuleType').value;
+
+			if (!name) {
+				alert('请输入规则名称');
+				return;
+			}
+
+			const newRule = {
+				id: Date.now().toString(),
+				name: name,
+				type: type,
+				basePrice: 0.5,
+				extraPrice: 10,
+				conditions: [],
+				customProcesses: [],
+			};
+
+			allRules[newRule.id] = newRule;
+			renderRulesList();
+			selectRule(newRule.id);
+			closeModal('newRuleModal');
+			document.getElementById('newRuleName').value = '';
+		}
+
+		// ==================== 价格计算 ====================
+		function calculatePrice() {
+			const length = parseFloat(document.getElementById('length-input').value) || 0;
+			const width = parseFloat(document.getElementById('width-input').value) || 0;
+			const area = length * width;
+			let price = 0;
+			const currentRule = allRules[currentRuleId];
+
+			switch (currentRule.type) {
+				case 'area':
+					const basePrice = parseFloat(document.getElementById('base-price-area').value) || 0;
+					const extraPrice = parseFloat(document.getElementById('extra-price-area').value) || 0;
+					price = basePrice * area + extraPrice;
+					break;
+				case 'fixed':
+					const fixedBase = parseFloat(document.getElementById('base-price-fixed').value) || 0;
+					const areaFactor = parseFloat(document.getElementById('area-factor').value) || 0;
+					price = fixedBase + areaFactor * area;
+					break;
+				case 'free':
+					price = 0;
+					break;
+			}
+
+			currentRule.conditions.forEach(function (condition) {
+				const processValue = getProcessValue(condition.process);
+				if (evaluateCondition(processValue, condition.value, condition.operator)) {
+					switch (condition.action) {
+						case '+':
+							price += condition.amount;
+							break;
+						case '-':
+							price -= condition.amount;
+							break;
+						case '*':
+							price *= condition.amount;
+							break;
+						case '/':
+							price /= condition.amount;
+							break;
 					}
+				}
+			});
 
-					if (type === 'select' && options.length === 0) {
-						alert('请添加选项值');
-						return;
-					}
+			document.getElementById('finalPrice').textContent = '¥' + price.toFixed(2);
+		}
 
-					const process = {
-						id: 'custom_' + Date.now(),
-						name: name,
-						type: type,
-						options: options,
-						custom: true,
-					};
+		function getProcessValue(processId) {
+			const element = document.getElementById('process-' + processId);
+			return element ? element.value : '';
+		}
 
-					// 添加到当前规则的自定义工艺
-					if (!allRules[currentRuleId].customProcesses) {
-						allRules[currentRuleId].customProcesses = [];
-					}
-					allRules[currentRuleId].customProcesses.push(process);
+		function evaluateCondition(actual, expected, operator) {
+			// 空值保护：actual 为 undefined/null/空字符串时条件不生效
+			if (actual === undefined || actual === null || actual === '') return false;
+			if (expected === undefined || expected === null || expected === '') return false;
 
-					renderProcesses();
-					renderConditions();
+			// 统一 trim 防空格干扰
+			var aStr = String(actual).trim();
+			var eStr = String(expected).trim();
 
-					closeModal('addProcessModal');
-					document.getElementById('processName').value = '';
-					document.getElementById('processOptions').value = '';
+			// 尝试数字比较
+			var aNum = parseFloat(aStr);
+			var eNum = parseFloat(eStr);
+			var bothNumeric = !isNaN(aNum) && !isNaN(eNum) && isFinite(aNum) && isFinite(eNum);
+
+			if (bothNumeric) {
+				// 双方都可解析为数字，按数值比较
+				switch (operator) {
+					case '=':
+						return aNum === eNum;
+					case '>':
+						return aNum > eNum;
+					case '<':
+						return aNum < eNum;
+					case '>=':
+						return aNum >= eNum;
+					case '<=':
+						return aNum <= eNum;
+					default:
+						return false;
+				}
+			} else {
+				// 字符串比较（如"沉金" = "沉金"）
+				switch (operator) {
+					case '=':
+						return aStr === eStr;
+					case '>':
+						return aStr > eStr;
+					case '<':
+						return aStr < eStr;
+					case '>=':
+						return aStr >= eStr;
+					case '<=':
+						return aStr <= eStr;
+					default:
+						return false;
+				}
+			}
+		}
+
+		// ==================== PCB 识别 ====================
+		async function GetPcbInfomation() {
+			try {
+				// 不传 net 参数（传 null 会导致查询失败返回 0 条）
+				// 先用无参获取所有折线的 primitiveId，再通过 pcb_SelectControl 选中后取包围盒
+				var ids = await eda.pcb_PrimitivePolyline.getAllPrimitiveId();
+
+				if (!ids || ids.length === 0) {
+					eda.sys_Message.showToastMessage('未识别到板框，请确认PCB板框存在或手动框选', 'error', 2);
+					return;
 				}
 
-				// 删除自定义工艺
-				function deleteProcess(processId) {
-					if (confirm('确定要删除这个工艺吗？')) {
-						const currentRule = allRules[currentRuleId];
-						if (currentRule && currentRule.customProcesses) {
-							currentRule.customProcesses = currentRule.customProcesses.filter((p) => p.id !== processId);
-							renderProcesses();
-							renderConditions();
-						}
-					}
+				eda.pcb_SelectControl.doSelectPrimitives(ids);
+				var selected = await eda.pcb_SelectControl.getSelectedPrimitives();
+
+				if (!selected || selected.length === 0) {
+					eda.sys_Message.showToastMessage('未识别到板框，请确认PCB板框存在', 'error', 2);
+					return;
 				}
 
-				// 编辑自定义工艺
-				function editProcess(processId) {
-					const currentRule = allRules[currentRuleId];
-					if (!currentRule || !currentRule.customProcesses) return;
+				// getSelectedPrimitives 返回的选择包围盒有 width/height（单位: mil）
+				// mil → cm: 1 mil = 0.00254 cm
+				var bounding = selected[0];
+				var widthCm = bounding.width * 0.00254;
+				var heightCm = bounding.height * 0.00254;
+				var All_Layers = await eda.pcb_Layer.getAllLayers();
 
-					const process = currentRule.customProcesses.find((p) => p.id === processId);
-					if (!process) return;
+				document.getElementById('width-input').value = Math.round(widthCm * 100) / 100;
+				document.getElementById('length-input').value = Math.round(heightCm * 100) / 100;
+				document.getElementById('layer-input').value = calcLayers(All_Layers);
+				eda.sys_Message.showToastMessage('识别成功', 'success', 2);
+				calculatePrice();
+			} catch (error) {
+				eda.sys_Message.showToastMessage('未识别到板框或板框过多，请手动框选并重试', 'error', 2);
+			}
+		}
 
-					// 填充编辑表单
-					document.getElementById('editProcessId').value = processId;
-					document.getElementById('editProcessName').value = process.name;
-					document.getElementById('editProcessType').value = process.type;
-
-					// 如果是选择类型，显示选项
-					if (process.type === 'select') {
-						document.getElementById('editProcessOptionsGroup').style.display = 'block';
-						document.getElementById('editProcessOptions').value = process.options ? process.options.join('\n') : '';
-					} else {
-						document.getElementById('editProcessOptionsGroup').style.display = 'none';
-					}
-
-					// 显示编辑模态框
-					document.getElementById('editProcessModal').classList.add('show');
+		function calcLayers(layers) {
+			let count = 0;
+			const ids = [1, 2].concat(
+				Array.from({ length: 32 }, function (_, i) {
+					return i + 15;
+				}),
+			);
+			for (const layer of layers) {
+				const id = parseInt(layer.id);
+				if (ids.includes(id) && layer.layerStatus === 1) {
+					count++;
 				}
+			}
+			return count;
+		}
 
-				// 保存编辑的自定义工艺
-				function saveEditProcess() {
-					const processId = document.getElementById('editProcessId').value;
-					const name = document.getElementById('editProcessName').value;
-					const type = document.getElementById('editProcessType').value;
-					const options = document
-						.getElementById('editProcessOptions')
-						.value.split('\n')
-						.filter((o) => o.trim());
-
-					if (!name) {
-						alert('请输入工艺名称');
-						return;
-					}
-
-					if (type === 'select' && options.length === 0) {
-						alert('请添加选项值');
-						return;
-					}
-
-					const currentRule = allRules[currentRuleId];
-					if (!currentRule || !currentRule.customProcesses) return;
-
-					// 找到要编辑的工艺
-					const processIndex = currentRule.customProcesses.findIndex((p) => p.id === processId);
-					if (processIndex === -1) return;
-
-					// 更新工艺信息
-					currentRule.customProcesses[processIndex] = {
-						...currentRule.customProcesses[processIndex],
-						name: name,
-						type: type,
-						options: options,
-					};
-
-					renderProcesses();
-					renderConditions();
-
-					closeModal('editProcessModal');
-				}
-
-				// 切换工艺输入类型（编辑模态框）
-				function toggleEditProcessInput() {
-					const type = document.getElementById('editProcessType').value;
-					const optionsGroup = document.getElementById('editProcessOptionsGroup');
-					optionsGroup.style.display = type === 'select' ? 'block' : 'none';
-				}
-
-				// 切换工艺输入类型（添加模态框）
-				function toggleProcessInput() {
-					const type = document.getElementById('processType').value;
-					const optionsGroup = document.getElementById('processOptionsGroup');
-					optionsGroup.style.display = type === 'select' ? 'block' : 'none';
-				}
-
-				// 导出规则
-				function exportRules() {
-					// 1. 创建一个新对象来存储要导出的规则，避免直接修改原始数据
-					const rulesToExport = { ...allRules };
-
-					// 2. 删除默认规则
-					if (rulesToExport.default) {
-						delete rulesToExport.default;
-					}
-
-					// 3. 将规则对象转换为数组，简化结构
-					const exportedRulesArray = Object.values(rulesToExport);
-
-					const exportData = {
-						// currentRuleId 现在需要检查它是否是默认规则，如果是，则不导出
-						currentRuleId: currentRuleId !== 'default' && allRules[currentRuleId] ? currentRuleId : null,
-						// 将 allRules 对象替换为 rules 数组
-						rules: exportedRulesArray,
-						timestamp: new Date().toISOString(),
-					};
-
-					const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-						type: 'application/json',
-					});
-					const url = URL.createObjectURL(blob);
-					const a = document.createElement('a');
-					a.href = url;
-					a.download = `pcb-pricing-rules-${Date.now()}.json`;
-					a.click();
-					URL.revokeObjectURL(url);
-				}
-		/**
-		 * 导出规则 - 默认为 .xlsx，传入 'json' 参数则导出 .json
-		 * @param {string} format - 可选 'json' 或 'xlsx'（默认）
-		 */
-		function exportRules(format = 'xlsx') {
-			const rulesToExport = { ...allRules };
-
-			// 删除 default 规则（不导出）
+		// ==================== 导入导出 ====================
+		function exportRules(format) {
+			format = format || 'xlsx';
+			const rulesToExport = Object.assign({}, allRules);
 			if (rulesToExport.default) {
 				delete rulesToExport.default;
 			}
-
 			const exportedRulesArray = Object.values(rulesToExport);
 
 			const commonData = {
@@ -857,34 +972,33 @@
 				rules: exportedRulesArray,
 			};
 
-			// ========== JSON 导出 ==========
 			if (format === 'json') {
-				const blob = new Blob([JSON.stringify(commonData, null, 2)], {
-					type: 'application/json',
-				});
+				const blob = new Blob([JSON.stringify(commonData, null, 2)], { type: 'application/json' });
 				const url = URL.createObjectURL(blob);
 				const a = document.createElement('a');
 				a.href = url;
-				a.download = `pcb-pricing-rules-${Date.now()}.json`;
+				a.download = 'pcb-pricing-rules-' + Date.now() + '.json';
 				a.click();
 				URL.revokeObjectURL(url);
 				return;
 			}
 
-			// ========== XLSX 导出（默认）==========
 			const rows = [];
-			exportedRulesArray.forEach((rule) => {
-				const flat = flattenWithPaths(rule);
-				rows.push(flat);
+			exportedRulesArray.forEach(function (rule) {
+				rows.push(flattenWithPaths(rule));
 			});
 
-			const headers = ["Field Path", ...exportedRulesArray.map(r => r.name || r.id)];
-			const allPaths = [...new Set(rows.flatMap(Object.keys))].sort();
+			const headers = ['Field Path'].concat(
+				exportedRulesArray.map(function (r) {
+					return r.name || r.id;
+				}),
+			);
+			const allPaths = Array.from(new Set(rows.flatMap(Object.keys))).sort();
 
 			const worksheetData = [headers];
-			allPaths.forEach(path => {
+			allPaths.forEach(function (path) {
 				const row = [path];
-				rows.forEach(flatObj => {
+				rows.forEach(function (flatObj) {
 					row.push(stringifyValue(flatObj[path]));
 				});
 				worksheetData.push(row);
@@ -892,14 +1006,10 @@
 
 			const ws = XLSX.utils.aoa_to_sheet(worksheetData);
 			const wb = XLSX.utils.book_new();
-			XLSX.utils.book_append_sheet(wb, ws, "Pricing Rules");
-			XLSX.writeFile(wb, `pcb-pricing-rules-${Date.now()}.xlsx`);
+			XLSX.utils.book_append_sheet(wb, ws, 'Pricing Rules');
+			XLSX.writeFile(wb, 'pcb-pricing-rules-' + Date.now() + '.xlsx');
 		}
 
-		/**
-		 * 导入规则 - 默认为 .xlsx，若文件是 .json 则自动识别并处理
-		 * @param {string} format - 可选 'json' 或 'xlsx'，但会优先根据文件扩展名判断
-		 */
 		function importRules(format) {
 			const input = document.createElement('input');
 			input.type = 'file';
@@ -907,22 +1017,15 @@
 			input.onchange = function (e) {
 				const file = e.target.files[0];
 				if (!file) return;
-
 				const reader = new FileReader();
-
 				reader.onload = function (event) {
 					try {
 						let data = null;
-
-						// 自动判断格式，或由 format 参数覆盖
-						const useJson = format === 'json' ||
-							file.name.endsWith('.json');
-
+						const useJson = format === 'json' || file.name.endsWith('.json');
 						if (useJson) {
 							data = JSON.parse(event.target.result);
 							processImportedData(data);
 						} else {
-							// 必须是 ArrayBuffer 才能解析 xlsx
 							const arrayBuffer = event.target.result;
 							const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 							const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -930,35 +1033,27 @@
 							processImportedData(data);
 						}
 					} catch (error) {
-						console.error('导入失败:', error);
 						alert('导入失败：文件解析错误或格式不正确');
 					}
 				};
-
-				// 读取模式：xlsx 需要 arraybuffer，json 用 text
 				if (file.name.endsWith('.xlsx')) {
 					reader.readAsArrayBuffer(file);
 				} else {
 					reader.readAsText(file);
 				}
-
-				input.value = ''; // 清空输入以便重复选择
+				input.value = '';
 			};
 			input.click();
 		}
 
 		// ==================== 辅助函数 ====================
-
-		/**
-		 * 将对象按路径展平：{ a: { b: 1 } } → { "a.b": 1 }
-		 */
-		function flattenWithPaths(obj, prefix = '', result = {}) {
+		function flattenWithPaths(obj, prefix, result) {
+			prefix = prefix || '';
+			result = result || {};
 			for (const key in obj) {
 				if (!obj.hasOwnProperty(key)) continue;
-
 				const value = obj[key];
-				const path = prefix ? `${prefix}.${key}` : key;
-
+				const path = prefix ? prefix + '.' + key : key;
 				if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
 					flattenWithPaths(value, path, result);
 				} else {
@@ -968,29 +1063,20 @@
 			return result;
 		}
 
-		/**
-		 * 安全序列化值用于表格显示
-		 */
 		function stringifyValue(val) {
-			if (val == null) return "";
-			if (typeof val === "string") return val;
-			if (typeof val === "number" || typeof val === "boolean") return String(val);
+			if (val == null) return '';
+			if (typeof val === 'string') return val;
+			if (typeof val === 'number' || typeof val === 'boolean') return String(val);
 			return JSON.stringify(val);
 		}
 
-		/**
-		 * 尝试还原原始类型（数字、布尔、null、JSON 对象等）
-		 */
 		function parseValue(val) {
-			if (val == null || val === "") return null;
+			if (val == null || val === '') return null;
 			const str = String(val).trim();
-
 			if (str.toLowerCase() === 'true') return true;
 			if (str.toLowerCase() === 'false') return false;
-
 			const num = Number(str);
 			if (!isNaN(num)) return num;
-
 			try {
 				return JSON.parse(str);
 			} catch (e) {
@@ -998,9 +1084,6 @@
 			}
 		}
 
-		/**
-		 * 按路径设置对象属性：setByPath(obj, 'a.b.c', 42)
-		 */
 		function setByPath(obj, path, value) {
 			const keys = path.split('.');
 			let current = obj;
@@ -1012,29 +1095,23 @@
 			current[keys[keys.length - 1]] = value;
 		}
 
-		/**
-		 * 解析 XLSX 表格为规则数组
-		 */
 		function parseXlsxSheet(sheet) {
 			const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-			if (data.length < 2) throw new Error("Excel 文件为空");
+			if (data.length < 2) throw new Error('Excel 文件为空');
 
-			const headers = data[0]; // ["Field Path", "Rule1", "Rule2"...]
+			const headers = data[0];
 			const rulesData = [];
 
 			for (let ri = 1; ri < data.length; ri++) {
 				const row = data[ri];
 				const path = row[0];
 				if (!path) continue;
-
 				for (let ci = 1; ci < headers.length; ci++) {
 					const ruleName = headers[ci];
 					const rawValue = row[ci];
-
 					if (!rulesData[ci - 1]) {
 						rulesData[ci - 1] = { id: generateId(), name: ruleName };
 					}
-
 					setByPath(rulesData[ci - 1], path, parseValue(rawValue));
 				}
 			}
@@ -1042,41 +1119,34 @@
 			return {
 				timestamp: new Date().toISOString(),
 				rules: rulesData,
-				currentRuleId: null // 后续逻辑自动选择
+				currentRuleId: null,
 			};
 		}
 
-		/**
-		 * 简单 ID 生成器
-		 */
 		function generateId() {
 			return 'rule_' + Date.now() + Math.random().toString(36).substr(2, 5);
 		}
 
-		/**
-		 * 处理导入的数据，合并到 allRules 并刷新 UI
-		 */
 		function processImportedData(data) {
-			// 清除非 default 规则
-			Object.keys(allRules).forEach(id => {
+			Object.keys(allRules).forEach(function (id) {
 				if (id !== 'default') delete allRules[id];
 			});
 
-			// 合并新规则
 			if (data.rules && Array.isArray(data.rules)) {
-				data.rules.forEach(rule => {
+				data.rules.forEach(function (rule) {
 					if (rule.id) {
 						allRules[rule.id] = rule;
 					}
 				});
 			}
 
-			// 设置当前规则
 			let newCurrentRuleId = null;
 			if (data.currentRuleId && allRules[data.currentRuleId]) {
 				newCurrentRuleId = data.currentRuleId;
 			} else {
-				const nonDefaultIds = Object.keys(allRules).filter(id => id !== 'default');
+				const nonDefaultIds = Object.keys(allRules).filter(function (id) {
+					return id !== 'default';
+				});
 				newCurrentRuleId = nonDefaultIds.length > 0 ? nonDefaultIds[0] : 'default';
 			}
 
@@ -1085,58 +1155,14 @@
 			alert('规则导入成功！');
 		}
 
-				// PCB识别函数
-				async function GetPcbInfomation() {
-					try {
-						const ids = await eda.pcb_PrimitivePolyline.getAllPrimitiveId(null, 11);
-						eda.pcb_SelectControl.doSelectPrimitives(ids);
-						let PCB_Infomation = await eda.pcb_SelectControl.getSelectedPrimitives();
-						PCB_Infomation = PCB_Infomation[0];
-						let width = PCB_Infomation.width * 0.254;
-						let height = PCB_Infomation.height * 0.254;
-						const All_Layers = await eda.pcb_Layer.getAllLayers();
-
-						document.getElementById('width-input').value = Math.round((width / 10) * 100) / 100;
-						document.getElementById('length-input').value = Math.round((height / 10) * 100) / 100;
-						document.getElementById('layer-input').value = calcLayers(All_Layers);
-						eda.sys_Message.showToastMessage('识别成功', 'success', 2);
-						// 自动计算价格
-						calculatePrice();
-					} catch (error) {
-						eda.sys_Message.showToastMessage('未识别到板框或板框过多，请手动框选并重试', 'error', 2);
-					}
+		// 监听颜色选择器变化
+		document.addEventListener('change', function (e) {
+			if (e.target.type === 'color') {
+				const span = e.target.nextElementSibling;
+				if (span) {
+					span.textContent = e.target.value;
 				}
-
-				// 获取PCB层数
-				function calcLayers(layers) {
-					let count = 0;
-					const ids = [
-						1,
-						2,
-						...Array.from(
-							{
-								length: 32,
-							},
-							(_, i) => i + 15,
-						),
-					];
-					for (const layer of layers) {
-						const id = parseInt(layer.id);
-						if (ids.includes(id) && layer.layerStatus === 1) {
-							count++;
-						}
-					}
-					return count;
-				}
-
-				// 监听颜色选择器变化
-				document.addEventListener('change', function (e) {
-					if (e.target.type === 'color') {
-						const span = e.target.nextElementSibling;
-						if (span) {
-							span.textContent = e.target.value;
-						}
-					}
-				});
+			}
+		});
 	</script>
 </html>
