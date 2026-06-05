@@ -1,7 +1,7 @@
 {
 	"About...": "About...",
-	"displayName": "PCB Pricing Calculator",
-	"description": "Supports offline PCB order pricing calculation, with multiple rule scenarios, custom calculation parameters, and built-in common pricing rules",
+	"PCB价格计算工具": "PCB Pricing Calculator",
+	"支持离线计算PCB下单价格，可添加多个规则场景，自定义添加计算参数，已内置嘉立创常用价格规则": "Supports offline PCB order pricing calculation, with multiple rule scenarios, custom calculation parameters, and built-in common pricing rules",
 	"PCB": "PCB",
 	"Price": "Price"
 }
