@@ -1,3 +1,7 @@
 {
-	"About...": "About..."
+	"About...": "About...",
+	"displayName": "PCB Pricing Calculator",
+	"description": "Supports offline PCB order pricing calculation, with multiple rule scenarios, custom calculation parameters, and built-in common pricing rules",
+	"PCB": "PCB",
+	"Price": "Price"
 }
