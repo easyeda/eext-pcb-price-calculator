@@ -5,20 +5,22 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 		<link rel="stylesheet" href="/iframe/style.css" />
-		<title data-i18n="pcb_price_title"></title>
+		<title data-i18n="PCB Offline Pricing Tool">PCB离线计价工具</title>
 	</head>
 	<body>
 		<div class="container">
 			<!-- 侧边栏 -->
 			<aside class="sidebar">
-				<h3 data-i18n="pricing_rules"></h3>
+				<h3 data-i18n="Pricing Rules">计价规则</h3>
 				<div id="rulesList">
 					<div class="rule-item active" data-rule-id="default">
-						<div class="rule-name" data-i18n="default_rule"></div>
-						<div class="rule-type" data-i18n="by_area"></div>
+						<div class="rule-name" data-i18n="Default Rule">默认规则</div>
+						<div class="rule-type" data-i18n="By Area">按面积计价</div>
 					</div>
 				</div>
-				<button class="btn btn-primary btn-small" style="width: 100%; margin-top: 12px" onclick="showNewRuleModal()" data-i18n="new_rule_btn"></button>
+				<button class="btn btn-primary btn-small" style="width: 100%; margin-top: 12px" onclick="showNewRuleModal()" data-i18n="New Rule">
+					新建规则
+				</button>
 			</aside>
 
 			<!-- 主内容区 -->
@@ -26,12 +28,12 @@
 				<!-- 工具栏 -->
 				<div class="toolbar">
 					<div class="toolbar-left">
-						<button class="btn btn-primary" onclick="GetPcbInfomation()" data-i18n="identify_pcb_info"></button>
-						<button class="btn btn-primary" onclick="calculatePrice()" data-i18n="calculate_price"></button>
+						<button class="btn btn-primary" onclick="GetPcbInfomation()" data-i18n="Identify PCB Info">识别PCB信息</button>
+						<button class="btn btn-primary" onclick="calculatePrice()" data-i18n="Calculate Price">计算价格</button>
 					</div>
 					<div class="toolbar-right">
-						<button class="btn btn-default" onclick="exportRules()" data-i18n="export_rules"></button>
-						<button class="btn btn-default" onclick="importRules()" data-i18n="import_rules"></button>
+						<button class="btn btn-default" onclick="exportRules()" data-i18n="Export Rules">导出规则</button>
+						<button class="btn btn-default" onclick="importRules()" data-i18n="Import Rules">导入规则</button>
 					</div>
 				</div>
 
@@ -40,106 +42,130 @@
 					<!-- 左侧面板 - PCB参数 -->
 					<div class="left-panel">
 						<div class="form-section">
-							<h3 data-i18n="basic_info"></h3>
+							<h3 data-i18n="Basic Info">基本信息</h3>
 
 							<div class="form-group">
-								<label for="board-type" data-i18n="board_type"></label>
+								<label for="board-type" data-i18n="Board Type">板材类别</label>
 								<select id="board-type" class="form-control">
-									<option value="fpc" data-i18n="fpc"></option>
+									<option value="fpc" data-i18n="FPC Flex Board">FPC软板</option>
 									<option value="fr4" selected>FR-4</option>
-									<option value="aluminum" data-i18n="aluminum"></option>
-									<option value="copper" data-i18n="copper"></option>
-									<option value="rogers" data-i18n="rogers"></option>
-									<option value="ptfe" data-i18n="ptfe"></option>
+									<option value="aluminum" data-i18n="Aluminum Board">铝基板</option>
+									<option value="copper" data-i18n="Copper Board">铜基板</option>
+									<option value="rogers" data-i18n="Rogers HF Board">罗杰斯高频板</option>
+									<option value="ptfe" data-i18n="PTFE HF Board">铁氟龙高频板</option>
 								</select>
 							</div>
 
 							<div class="form-group">
-								<label data-i18n="board_size"></label>
+								<label data-i18n="Board Size">板子尺寸</label>
 								<div class="input-group">
-									<input type="number" id="length-input" class="form-control" data-i18n-placeholder="length_placeholder" />
+									<input type="number" id="length-input" class="form-control" placeholder="长" data-i18n-placeholder="Length" />
 									<span class="unit">CM</span>
-									<input type="number" id="width-input" class="form-control" data-i18n-placeholder="width_placeholder" />
+									<input type="number" id="width-input" class="form-control" placeholder="宽" data-i18n-placeholder="Width" />
 									<span class="unit">CM</span>
 								</div>
 							</div>
 
 							<div class="form-group">
-								<label data-i18n="board_layers"></label>
+								<label data-i18n="Board Layers">板子层数</label>
 								<div class="input-group">
 									<input type="number" id="layer-input" class="form-control" />
-									<span class="unit" data-i18n="layers_unit"></span>
+									<span class="unit" data-i18n="layers">层</span>
 								</div>
 							</div>
 
 							<div class="form-group">
-								<label for="product-type" data-i18n="product_type"></label>
+								<label for="product-type" data-i18n="Product Type">产品类型</label>
 								<select id="product-type" class="form-control">
-									<option value="others" data-i18n="industrial_consumer"></option>
-									<option value="aviation" data-i18n="aviation"></option>
-									<option value="help" data-i18n="medical"></option>
+									<option value="others" data-i18n="Industrial/Consumer/Other Electronics">工业/消费/其他类电子产品</option>
+									<option value="aviation" data-i18n="Aviation">航空</option>
+									<option value="help" data-i18n="Medical">医疗</option>
 								</select>
 							</div>
 
 							<div class="form-group">
-								<label data-i18n="confirm_production_draft"></label>
+								<label data-i18n="Confirm Production Draft">确认生产稿</label>
 								<div class="input-group">
-									<input type="number" id="verify-group" class="form-control" data-i18n-placeholder="not_needed_placeholder" />
-									<span class="unit" data-i18n="times_unit"></span>
+									<input
+										type="number"
+										id="verify-group"
+										class="form-control"
+										placeholder="不需要则放空"
+										data-i18n-placeholder="Leave empty if not needed"
+									/>
+									<span class="unit" data-i18n="times">次</span>
 								</div>
 							</div>
 						</div>
 
 						<div class="form-section">
-							<h3 data-i18n="pcb_process"></h3>
+							<h3 data-i18n="PCB Process">PCB工艺</h3>
 							<div id="processList"></div>
-							<button class="btn btn-default btn-small" style="width: 100%; margin-top: 8px" onclick="showAddProcessModal()" data-i18n="add_custom_process_btn"></button>
+							<button
+								class="btn btn-default btn-small"
+								style="width: 100%; margin-top: 8px"
+								onclick="showAddProcessModal()"
+								data-i18n="Add Custom Process"
+							>
+								添加自定义工艺
+							</button>
 						</div>
 					</div>
 
 					<!-- 右侧面板 - 计价规则 -->
 					<div class="right-panel">
 						<div class="form-section">
-							<h3 data-i18n="pricing_method"></h3>
+							<h3 data-i18n="Pricing Method">计价方式</h3>
 							<div class="tabs">
-								<button class="tab active" data-tab="area" onclick="switchTab('area')" data-i18n="by_area"></button>
-								<button class="tab" data-tab="fixed" onclick="switchTab('fixed')" data-i18n="one_time_fee"></button>
-								<button class="tab" data-tab="free" onclick="switchTab('free')" data-i18n="free"></button>
+								<button class="tab active" data-tab="area" onclick="switchTab('area')" data-i18n="By Area">按面积计价</button>
+								<button class="tab" data-tab="fixed" onclick="switchTab('fixed')" data-i18n="One-time Fee">一次性付费</button>
+								<button class="tab" data-tab="free" onclick="switchTab('free')" data-i18n="Free">免费</button>
 							</div>
 
 							<div id="area-tab" class="tab-content active">
 								<div class="form-group">
-									<label data-i18n="base_price_per_sqcm"></label>
+									<label data-i18n="Base Price (yuan/sq cm)">基础价格 (元/平方厘米)</label>
 									<input type="number" id="base-price-area" class="form-control" value="0.5" step="0.01" />
 								</div>
 								<div class="form-group">
-									<label data-i18n="extra_price_yuan"></label>
+									<label data-i18n="Extra Price (yuan)">附加价格 (元)</label>
 									<input type="number" id="extra-price-area" class="form-control" value="10" step="0.01" />
 								</div>
-								<p style="color: #5a6c7d; font-size: 12px; margin-top: 8px" data-i18n="area_formula"></p>
+								<p style="color: #5a6c7d; font-size: 12px; margin-top: 8px" data-i18n="=(Base Price x Area) + Extra Price">
+									=(基础价格 × 面积) + 附加价格
+								</p>
 							</div>
 
 							<div id="fixed-tab" class="tab-content">
 								<div class="form-group">
-									<label data-i18n="base_price_yuan"></label>
+									<label data-i18n="Base Price (yuan)">基础价格 (元)</label>
 									<input type="number" id="base-price-fixed" class="form-control" value="100" step="0.01" />
 								</div>
 								<div class="form-group">
-									<label data-i18n="area_factor"></label>
+									<label data-i18n="Area Factor">面积系数</label>
 									<input type="number" id="area-factor" class="form-control" value="0.1" step="0.01" />
 								</div>
-								<p style="color: #5a6c7d; font-size: 12px; margin-top: 8px" data-i18n="fixed_formula"></p>
+								<p style="color: #5a6c7d; font-size: 12px; margin-top: 8px" data-i18n="=Base Price + (Area Factor x Area)">
+									=基础价格 + (面积系数 × 面积)
+								</p>
 							</div>
 
 							<div id="free-tab" class="tab-content">
-								<p style="color: #5a6c7d; font-size: 12px" data-i18n="all_orders_free"></p>
+								<p style="color: #5a6c7d; font-size: 12px" data-i18n="All orders free under this rule">此规则下所有订单免费</p>
 							</div>
 						</div>
 
 						<div class="form-section">
-							<h3 data-i18n="conditional_rules"></h3>
+							<h3 data-i18n="Conditional Rules">条件规则</h3>
 							<div id="conditionsList"></div>
-							<button class="btn btn-default btn-small" style="width: 100%; margin-top: 8px" onclick="addCondition()" data-i18n="add_conditional_rule"></button>
+							<button
+								class="btn btn-default btn-small"
+								style="width: 100%; margin-top: 8px"
+								onclick="addCondition()"
+								data-i18n="Add Conditional Rule"
+							>
+								添加条件规则
+							</button>
 						</div>
 					</div>
 				</div>
@@ -148,7 +174,7 @@
 
 		<!-- 固定价格显示 -->
 		<div class="price-display-fixed">
-			<div class="price-label" data-i18n="estimated_price"></div>
+			<div class="price-label" data-i18n="Estimated Price">预估价格</div>
 			<div class="price-value" id="finalPrice">¥0.00</div>
 		</div>
 
@@ -158,26 +184,32 @@
 			<div class="modal-dialog-box">
 				<div class="modal-dialog modal-dialog-sm">
 					<div class="modal-header">
-						<h3 data-i18n="new_pricing_rule"></h3>
+						<h3 data-i18n="New Pricing Rule">新建计价规则</h3>
 						<button class="modal-close" onclick="closeModal('newRuleModal')">&times;</button>
 					</div>
 					<div class="modal-body">
 						<div class="form-group">
-							<label data-i18n="rule_name_label"></label>
-							<input type="text" id="newRuleName" class="form-control" data-i18n-placeholder="input_rule_name_ph" />
+							<label data-i18n="Rule Name">规则名称</label>
+							<input
+								type="text"
+								id="newRuleName"
+								class="form-control"
+								placeholder="输入规则名称"
+								data-i18n-placeholder="Enter rule name"
+							/>
 						</div>
 						<div class="form-group">
-							<label data-i18n="pricing_method_label"></label>
+							<label data-i18n="Pricing Method">计价方式</label>
 							<select id="newRuleType" class="form-control">
-								<option value="area" data-i18n="by_area"></option>
-								<option value="fixed" data-i18n="one_time_fee"></option>
-								<option value="free" data-i18n="free"></option>
+								<option value="area" data-i18n="By Area">按面积计价</option>
+								<option value="fixed" data-i18n="One-time Fee">一次性付费</option>
+								<option value="free" data-i18n="Free">免费</option>
 							</select>
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button class="btn btn-default" onclick="closeModal('newRuleModal')" data-i18n="cancel"></button>
-						<button class="btn btn-primary" onclick="createNewRule()" data-i18n="create"></button>
+						<button class="btn btn-default" onclick="closeModal('newRuleModal')" data-i18n="Cancel">取消</button>
+						<button class="btn btn-primary" onclick="createNewRule()" data-i18n="Create">创建</button>
 					</div>
 				</div>
 			</div>
@@ -189,30 +221,46 @@
 			<div class="modal-dialog-box">
 				<div class="modal-dialog modal-dialog-sm">
 					<div class="modal-header">
-						<h3 data-i18n="add_custom_process_title"></h3>
+						<h3 data-i18n="Add Custom Process">添加自定义工艺</h3>
 						<button class="modal-close" onclick="closeModal('addProcessModal')">&times;</button>
 					</div>
 					<div class="modal-body">
 						<div class="form-group">
-							<label data-i18n="process_name_label"></label>
-							<input type="text" id="processName" class="form-control" data-i18n-placeholder="input_process_name_ph" />
+							<label data-i18n="Process Name">工艺名称</label>
+							<input
+								type="text"
+								id="processName"
+								class="form-control"
+								placeholder="输入工艺名称"
+								data-i18n-placeholder="Enter process name"
+							/>
 						</div>
 						<div class="form-group">
-							<label data-i18n="input_type_label"></label>
+							<label data-i18n="Input Type">输入类型</label>
 							<select id="processType" class="form-control" onchange="toggleProcessInput()">
-								<option value="select" data-i18n="dropdown_select"></option>
-								<option value="input" data-i18n="numeric_input"></option>
-								<option value="color" data-i18n="color_select"></option>
+								<option value="select" data-i18n="Dropdown Select">下拉选择</option>
+								<option value="input" data-i18n="Numeric Input">数值输入</option>
+								<option value="color" data-i18n="Color Select">颜色选择</option>
 							</select>
 						</div>
 						<div class="form-group" id="processOptionsGroup">
-							<label data-i18n="options_per_line"></label>
-							<textarea id="processOptions" class="form-control" rows="4" data-i18n-placeholder="process_options_placeholder"></textarea>
+							<label data-i18n="Options (one per line)">选项值（每行一个）</label>
+							<textarea
+								id="processOptions"
+								class="form-control"
+								rows="4"
+								placeholder="选项1
+选项2
+选项3"
+								data-i18n-placeholder="Option 1
+Option 2
+Option 3"
+							></textarea>
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button class="btn btn-default" onclick="closeModal('addProcessModal')" data-i18n="cancel"></button>
-						<button class="btn btn-primary" onclick="addCustomProcess()" data-i18n="add_btn"></button>
+						<button class="btn btn-default" onclick="closeModal('addProcessModal')" data-i18n="Cancel">取消</button>
+						<button class="btn btn-primary" onclick="addCustomProcess()" data-i18n="Add">添加</button>
 					</div>
 				</div>
 			</div>
@@ -224,31 +272,47 @@
 			<div class="modal-dialog-box">
 				<div class="modal-dialog modal-dialog-sm">
 					<div class="modal-header">
-						<h3 data-i18n="edit_custom_process_title"></h3>
+						<h3 data-i18n="Edit Custom Process">编辑自定义工艺</h3>
 						<button class="modal-close" onclick="closeModal('editProcessModal')">&times;</button>
 					</div>
 					<div class="modal-body">
 						<input type="hidden" id="editProcessId" />
 						<div class="form-group">
-							<label data-i18n="process_name_label"></label>
-							<input type="text" id="editProcessName" class="form-control" data-i18n-placeholder="input_process_name_ph" />
+							<label data-i18n="Process Name">工艺名称</label>
+							<input
+								type="text"
+								id="editProcessName"
+								class="form-control"
+								placeholder="输入工艺名称"
+								data-i18n-placeholder="Enter process name"
+							/>
 						</div>
 						<div class="form-group">
-							<label data-i18n="input_type_label"></label>
+							<label data-i18n="Input Type">输入类型</label>
 							<select id="editProcessType" class="form-control" onchange="toggleEditProcessInput()">
-								<option value="select" data-i18n="dropdown_select"></option>
-								<option value="input" data-i18n="numeric_input"></option>
-								<option value="color" data-i18n="color_select"></option>
+								<option value="select" data-i18n="Dropdown Select">下拉选择</option>
+								<option value="input" data-i18n="Numeric Input">数值输入</option>
+								<option value="color" data-i18n="Color Select">颜色选择</option>
 							</select>
 						</div>
 						<div class="form-group" id="editProcessOptionsGroup" style="display: none">
-							<label data-i18n="options_per_line"></label>
-							<textarea id="editProcessOptions" class="form-control" rows="4" data-i18n-placeholder="process_options_placeholder"></textarea>
+							<label data-i18n="Options (one per line)">选项值（每行一个）</label>
+							<textarea
+								id="editProcessOptions"
+								class="form-control"
+								rows="4"
+								placeholder="选项1
+选项2
+选项3"
+								data-i18n-placeholder="Option 1
+Option 2
+Option 3"
+							></textarea>
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button class="btn btn-default" onclick="closeModal('editProcessModal')" data-i18n="cancel"></button>
-						<button class="btn btn-primary" onclick="saveEditProcess()" data-i18n="save"></button>
+						<button class="btn btn-default" onclick="closeModal('editProcessModal')" data-i18n="Cancel">取消</button>
+						<button class="btn btn-primary" onclick="saveEditProcess()" data-i18n="Save">保存</button>
 					</div>
 				</div>
 			</div>
@@ -257,7 +321,7 @@
 
 	<script>
 		// ==================== i18n ====================
-		var edaObj = (typeof eda !== 'undefined') ? eda : (window.parent && window.parent.eda);
+		var edaObj = typeof eda !== 'undefined' ? eda : window.parent && window.parent.eda;
 		function t(tag) {
 			if (edaObj && edaObj.sys_I18n) return edaObj.sys_I18n.text(tag);
 			return tag;
@@ -307,7 +371,13 @@
 		function initializeProcesses() {
 			allProcesses = [
 				{ id: 'put_together', name: t('panel_count'), type: 'input', unit: t('unit_piece') },
-				{ id: 'delivery', name: t('delivery_method'), type: 'select', options: ['single_piece', 'panel'], optionTags: ['single_piece', 'panel'] },
+				{
+					id: 'delivery',
+					name: t('delivery_method'),
+					type: 'select',
+					options: ['single_piece', 'panel'],
+					optionTags: ['single_piece', 'panel'],
+				},
 				{ id: 'copper_thick', name: t('outer_copper_thickness'), type: 'input', unit: t('unit_ounce') },
 				{ id: 'soldermask_color', name: t('solder_mask_color'), type: 'color', default: '#2E8B57' },
 				{ id: 'content_color', name: t('silkscreen_color'), type: 'color', default: '#ffffff' },
@@ -318,7 +388,13 @@
 					options: ['via_tenting', 'via_opening', 'via_oil_plugging', 'via_resin_plugging', 'via_copper_plugging'],
 					optionTags: ['via_tenting', 'via_opening', 'via_oil_plugging', 'via_resin_plugging', 'via_copper_plugging'],
 				},
-				{ id: 'solder_cover_type', name: t('pad_finish'), type: 'select', options: ['leaded_hasl', 'lead_free_hasl', 'enig'], optionTags: ['leaded_hasl', 'lead_free_hasl', 'enig'] },
+				{
+					id: 'solder_cover_type',
+					name: t('pad_finish'),
+					type: 'select',
+					options: ['leaded_hasl', 'lead_free_hasl', 'enig'],
+					optionTags: ['leaded_hasl', 'lead_free_hasl', 'enig'],
+				},
 				{
 					id: 'min_hole_diameter',
 					name: t('min_hole_diameter'),
@@ -326,7 +402,13 @@
 					options: ['min_hole_03', 'min_hole_025', 'min_hole_02', 'min_hole_015'],
 					optionTags: ['min_hole_03', 'min_hole_025', 'min_hole_02', 'min_hole_015'],
 				},
-				{ id: 'gold_finger_bevel', name: t('gold_finger_bevel'), type: 'select', options: ['not_needed', 'needed'], optionTags: ['not_needed', 'needed'] },
+				{
+					id: 'gold_finger_bevel',
+					name: t('gold_finger_bevel'),
+					type: 'select',
+					options: ['not_needed', 'needed'],
+					optionTags: ['not_needed', 'needed'],
+				},
 				{ id: 'line_test', name: t('line_test'), type: 'select', options: ['aoi_flying_probe'], optionTags: ['aoi_flying_probe'] },
 			];
 		}
@@ -375,10 +457,14 @@
 						? '<div class="process-actions">' +
 							'<button class="icon-btn" onclick="editProcess(\'' +
 							process.id +
-							'\')" title="' + t('edit_custom_process_title') + '">&#9998;</button>' +
+							'\')" title="' +
+							t('edit_custom_process_title') +
+							'">&#9998;</button>' +
 							'<button class="icon-btn icon-btn-danger" onclick="deleteProcess(\'' +
 							process.id +
-							'\')" title="' + t('cancel') + '">&times;</button>' +
+							'\')" title="' +
+							t('cancel') +
+							'">&times;</button>' +
 							'</div>'
 						: '');
 				processList.appendChild(processItem);
@@ -409,7 +495,9 @@
 						'<div class="input-group">' +
 						'<input type="number" id="process-' +
 						process.id +
-						'" class="form-control" placeholder="' + t('input_value_placeholder') + '"' +
+						'" class="form-control" placeholder="' +
+						t('input_value_placeholder') +
+						'"' +
 						inputVal +
 						' onchange="saveCurrentProcessValue(\'' +
 						process.id +
@@ -470,7 +558,9 @@
 					'<select class="condition-input" onchange="updateCondition(' +
 					condition.id +
 					",'value',this.value)\">" +
-					'<option value="">' + t('select_value') + '</option>' +
+					'<option value="">' +
+					t('select_value') +
+					'</option>' +
 					process.options
 						.map(function (opt, idx) {
 							var displayText = process.optionTags ? t(process.optionTags[idx]) : opt;
@@ -482,7 +572,9 @@
 			}
 			// 其它类型（input/color/未关联工艺）用文本输入
 			return (
-				'<input type="text" class="condition-input" placeholder="' + t('select_value') + '" value="' +
+				'<input type="text" class="condition-input" placeholder="' +
+				t('select_value') +
+				'" value="' +
 				(condition.value || '') +
 				'" onchange="updateCondition(' +
 				condition.id +
@@ -504,19 +596,26 @@
 				conditionDiv.className = 'condition-rule';
 				conditionDiv.innerHTML =
 					'<div class="condition-header">' +
-					'<span class="condition-title">' + t('conditional_rule_prefix') +
+					'<span class="condition-title">' +
+					t('conditional_rule_prefix') +
 					condition.id +
 					'</span>' +
 					'<button class="icon-btn icon-btn-danger" onclick="removeCondition(' +
 					condition.id +
-					')" title="' + t('cancel') + '">&times;</button>' +
+					')" title="' +
+					t('cancel') +
+					'">&times;</button>' +
 					'</div>' +
 					'<div class="condition-body">' +
-					'<span>' + t('if_label') + '</span>' +
+					'<span>' +
+					t('if_label') +
+					'</span>' +
 					'<select class="condition-select" onchange="onConditionProcessChange(' +
 					condition.id +
 					',this.value)">' +
-					'<option value="">' + t('select_process') + '</option>' +
+					'<option value="">' +
+					t('select_process') +
+					'</option>' +
 					[...allProcesses, ...(currentRule.customProcesses || [])]
 						.map(function (p) {
 							return '<option value="' + p.id + '"' + (condition.process === p.id ? ' selected' : '') + '>' + p.name + '</option>';
@@ -533,7 +632,9 @@
 						.join('') +
 					'</select>' +
 					renderConditionValueControl(condition) +
-					'<span>' + t('then_price') + '</span>' +
+					'<span>' +
+					t('then_price') +
+					'</span>' +
 					'<select class="condition-select" onchange="updateCondition(' +
 					condition.id +
 					",'action',this.value)\">" +
@@ -550,7 +651,9 @@
 					(condition.action === '/' ? ' selected' : '') +
 					'>/</option>' +
 					'</select>' +
-					'<input type="number" class="condition-input" placeholder="' + t('amount_placeholder') + '" value="' +
+					'<input type="number" class="condition-input" placeholder="' +
+					t('amount_placeholder') +
+					'" value="' +
 					condition.amount +
 					'" onchange="updateCondition(' +
 					condition.id +

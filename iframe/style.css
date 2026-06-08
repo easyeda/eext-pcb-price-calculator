@@ -314,8 +314,8 @@ textarea.form-control {
 .process-item {
 	display: flex;
 	align-items: center;
-	height: 28px;
-	padding: 0 8px;
+	min-height: 28px;
+	padding: 4px 8px;
 	margin-bottom: 4px;
 	border-radius: 2px;
 	transition: background var(--transition);
@@ -327,16 +327,34 @@ textarea.form-control {
 }
 
 .process-name {
-	width: 80px;
+	width: 96px;
 	flex-shrink: 0;
 	padding: 0 8px;
-	line-height: 28px;
+	line-height: 20px;
 	color: var(--text-primary);
+	word-break: break-all;
+	white-space: normal;
+	display: flex;
+	align-items: center;
+	min-height: 28px;
 }
 
 .process-control {
 	flex: 1;
 	padding: 0 4px;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.process-control .form-control {
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.process-control select.form-control {
+	min-width: 0;
 }
 
 .process-actions {

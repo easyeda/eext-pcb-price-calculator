@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title data-i18n="generative_pcb_test"></title>
+		<title data-i18n="Generative PCB Test">生成式PCB测试</title>
 		<style>
 			body {
 				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -72,16 +72,23 @@
 	</head>
 	<body>
 		<div class="container">
-			<h2 data-i18n="generative_pcb"></h2>
+			<h2 data-i18n="Generative PCB">生成式PCB</h2>
 			<div class="input-group">
-				<input type="text" class="input-field" id="userInput" data-i18n-placeholder="input_command_ph" onkeypress="handleKeyPress(event)" />
-				<button class="execute-button" onclick="executeCommand()" data-i18n="execute"></button>
+				<input
+					type="text"
+					class="input-field"
+					id="userInput"
+					placeholder="输入您的指令..."
+					data-i18n-placeholder="Enter your command..."
+					onkeypress="handleKeyPress(event)"
+				/>
+				<button class="execute-button" onclick="executeCommand()" data-i18n="Execute">执行</button>
 			</div>
 			<div id="resultContainer" class="result-container" style="display: none"></div>
 		</div>
 
 		<script>
-			var edaObj = (typeof eda !== 'undefined') ? eda : (window.parent && window.parent.eda);
+			var edaObj = typeof eda !== 'undefined' ? eda : window.parent && window.parent.eda;
 			function t(tag) {
 				if (edaObj && edaObj.sys_I18n) return edaObj.sys_I18n.text(tag);
 				return tag;
